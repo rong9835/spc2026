@@ -1,0 +1,8 @@
+table {
+  border: 1px solid black;
+}
+#calendar td {
+  text-align: center;
+
+  border: 1px solid black;
+}

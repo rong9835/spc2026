@@ -1,0 +1,20 @@
+table {
+  border: 1px solid black;
+}
+#calendar td {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+#calendar th {
+  border: 1px solid black;
+}
+
+#calendar tr :first-child {
+  color: red;
+}
+#calendar tr :last-child {
+  color: blue;
+}
