@@ -1,0 +1,31 @@
+h1,
+h2 {
+  text-align: center;
+}
+
+#calendar {
+  width: 100%;
+  border-collapse: collapse;
+}
+img {
+  width: 100%;
+}
+#calendar th {
+  /* #calender th : calendar 밑에있는 모든 th */
+  /* #calender > th : calendar qkfh 밑에있는 모든 th */
+  width: 14%;
+  padding: 10px;
+  background-color: #dadada;
+}
+#calendar td {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid black;
+}
+#calendar tr *:first-child {
+  color: red;
+}
+#calendar th:last-child,
+#calendar td:last-child {
+  color: blue;
+}
