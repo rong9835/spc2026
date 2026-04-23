@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Document</title>
+    <style>
+      .box {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+        animation-name: moveLeft; /* 내가정한이름 */
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+        animation-timing-function: linear;
+        position: relative;
+      }
+      @keyframes moveLeft {
+        0% {
+          left: 0;
+        }
+        100% {
+          left: 200px;
+        }
+      }
+      .text {
+        color: black;
+        animation-name: fadeOut; /* 내가정한이름 */
+        animation-duration: 1.5s;
+        animation-delay: 2s;
+        animation-timing-function: ease-in;
+        animation-iteration-count: infinite;
+      }
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+          /* 불투명 */
+        }
+        100% {
+          opacity: 0;
+          /* 투명 */
+        }
+      }
+      .cricle {
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+        border-radius: 30px;
+        animation-iteration-count: infinite;
+        animation-name: rotateAndScale;
+        animation-duration: 3s;
+      }
+
+      @keyframes rotateAndScale {
+        0% {
+          transform: rotate(0deg) scale(1);
+        }
+        50% {
+          transform: rotate(180deg) scale(1.5);
+        }
+
+        100% {
+          transform: rotate(360deg) scale(1);
+        }
+      }
+      .image {
+        width: 300px;
+        height: 200px;
+        animation-name: shake;
+        animation-duration: 0.5s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+      @keyframes shake {
+        0% {
+          transform: translatex(0);
+        }
+        25% {
+          transform: translateX(-10px) rotate(-5deg);
+        }
+        75% {
+          transform: translateX(10px) rotate(5deg);
+        }
+
+        100% {
+          transform: translateX(S);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box"></div>
+    <hr />
+    <p class="text">페이드 아웃 글자 효과</p>
+    <hr />
+    <div class="cricle"></div>
+    <hr />
+    <img class="image" src="/images/다운로드.jpeg" alt="" />
+  </body>
+</html>

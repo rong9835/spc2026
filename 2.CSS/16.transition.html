@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .square {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+
+        transition-property: width, height;
+        transition-duration: 0.5s;
+        transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .square:hover {
+        width: 150px;
+        height: 150px;
+      }
+
+      .button {
+        color: black;
+        transition-property: color;
+        transition-duration: 1.5s;
+      }
+
+      .button:hover {
+        color: red;
+      }
+
+      .image {
+        width: 300px;
+        height: 200px;
+        transition-property: transform;
+        transition-duration: 1s;
+      }
+      .image:hover {
+        transform: rotate(180deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="square"></div>
+    <br />
+    <button class="button">마우스를 올려보시오</button>
+    <br />
+    <img class="image" src="/images/다운로드.jpeg" alt="" />
+  </body>
+</html>
