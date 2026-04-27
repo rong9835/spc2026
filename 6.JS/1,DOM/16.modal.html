@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/6.JS/1,DOM/css/modal.css" />
+  </head>
+  <body>
+    <h1>홈페이지 인사말</h1>
+    <p>우리 홈페이지 소개 내용</p>
+    <p>우리 홈페이지 소개 내용</p>
+    <p>우리 홈페이지 소개 내용</p>
+    <button id="open">모달열기</button>
+
+    <div class="modal-wrapper" style="display: none">
+      <div class="modal">
+        <div class="modal-title">안녕하세요</div>
+        <p>모달에 입력할 내용을 작성</p>
+        <div class="close-wrapper">
+          <button id="close">닫기</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const open = document.getElementById("open");
+      const close = document.getElementById("close");
+      const modal = document.querySelector(".modal-wrapper");
+      open.onclick = () => {
+        modal.style.display = "flex";
+      };
+
+      close.onclick = () => {
+        modal.style.display = "none";
+      };
+    </script>
+  </body>
+</html>

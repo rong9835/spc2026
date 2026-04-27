@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #mydiv {
+        display: none;
+        width: 200px;
+        height: 200px;
+        background-color: lightsalmon;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Show /Hide</h1>
+    <button onclick="showhide_bugfix2()">숨겨진 요소 토글</button>
+    <div id="mydiv">이것은 숨겨진 div요소입니다</div>
+    <script>
+      function showhidewhithbug() {
+        const div = document.querySelector("#mydiv");
+        if (div.style.display == "none") {
+          div.style.display = "block";
+        } else {
+          div.style.display = "none";
+        }
+      }
+
+      function showhide_bugfix1() {
+        const div = document.querySelector("#mydiv");
+        if (div.style.display == "block") {
+          div.style.display = "none";
+        } else {
+          div.style.display = "block";
+        }
+      }
+      function showhide_bugfix2() {
+        const div = document.querySelector("#mydiv");
+        // getComputedStyle: 실제 적용된 스타일을 읽어옴 (CSS가 적용된 현재값)
+        const currentDisplay = window.getComputedStyle(div).display;
+
+        if (currentDisplay === "none") {
+          div.style.display = "block";
+        } else {
+          div.style.display = "none";
+        }
+      }
+    </script>
+  </body>
+</html>

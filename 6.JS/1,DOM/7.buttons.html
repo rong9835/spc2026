@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>버튼 두개</h1>
+    <div id="view">0</div>
+    <!-- 이걸 가져다가 -->
+    <div>
+      <button onclick="buttonClick()">+1</button>
+      <button onclick="buttonClick2()">-1</button>
+    </div>
+    <script>
+      //각자의 버튼이 눌릴떄마다 위에 div의 값을 가져다가 +1 또는 -1을 한다
+      function buttonClick() {
+        const view = document.getElementById("view");
+        view.textContent = Number(view.textContent) + 1;
+      }
+      function buttonClick2() {
+        const view = document.getElementById("view");
+        view.textContent = Number(view.textContent) - 1;
+      }
+    </script>
+  </body>
+</html>

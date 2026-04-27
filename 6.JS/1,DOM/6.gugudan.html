@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>구구단</title>
+  </head>
+  <body>
+    <h1>구구단 출력기</h1>
+    <input type="text" placeholder="단을 입력하시오 (예 2)" id="input" />
+    <button onclick="printGugudan()">출력하기</button>
+    <div id="result">
+      <!-- 나의 결과가 출력될 곳 -->
+    </div>
+
+    <script>
+      function printGugudan() {
+        // ===============
+        // 입력값 가져오기
+        // ===============
+
+        // console.log("찍혔음");
+        const userInput = document.getElementById("input"); //이건 DOM이 반환됨
+
+        const userInputValue = userInput.value; //해당 DOM 요소가 가지고 있는 값
+
+        // const userValue = document.getElementById("input").value; //나중에는 이렇게 한줄로 하면됨
+
+        console.log(userInput.value);
+        // console.log(userValue);
+        const userInputValueNumber = parseInt(userInputValue); // 문자열 숫자를 숫자 숫자로 바꿈
+
+        // ===============
+        // 입력값 검증하기
+        // ===============
+        if (isNaN(userInputValueNumber)) {
+          const result = document.getElementById("result");
+          result.innerHTML = "<h3>입력은 숫자만 허용합니다 </h3>";
+          return;
+        }
+
+        if (userInputValueNumber < 1 || userInputValueNumber > 9) {
+          const result = document.getElementById("result");
+          result.innerHTML = "<h3>입력은 1~9까지만 허용됩니다 </h3>";
+          return;
+        }
+        // ===============
+        // 출력값 만들기
+        // ===============
+        const result = document.getElementById("result");
+        console.log(result);
+        // textContent는 말 그대로 글자 본문을 입력할 때 사용
+
+        // innerHTML 은 HTML값을 파싱 할 수 있도록 출력
+        result.innerHTML = "<h3>" + userInputValue + "단 </h3>";
+        for (let i = 1; i <= 9; i++) {
+          //   result.innerHTML +=
+          //     userInputValue + "X" + i + "=" + userValue * i + "<br>";
+          result.innerHTML += `${userInputValue} x ${i} = ${userInputValue * i}<br>`;
+        }
+      }
+    </script>
+  </body>
+</html>

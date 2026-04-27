@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>나의 헤딩</h1>
+    <p>여기는 나의 문장이 있는곳</p>
+    <div id="output">
+      <!-- 여기가 동적으로 컨텐츠를 채울곳 -->
+    </div>
+    <p>여기는 나의 두번째 문장이 있는 곳</p>
+    <button onclick="sayHello()">여기는 나의 버튼</button>
+    <script>
+      function sayHello() {
+        console.log("sayhello");
+        const myoutput = document.getElementById("output");
+        console.log(myoutput);
+        myoutput.textContent = "나의 새로운 동적 문장";
+      }
+    </script>
+  </body>
+</html>

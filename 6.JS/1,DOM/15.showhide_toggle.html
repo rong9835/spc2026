@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #mydiv {
+        display: none;
+        width: 200px;
+        height: 200px;
+        background-color: lightsalmon;
+      }
+
+      .show {
+        display: block !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Show /Hide</h1>
+    <button onclick="showhide_toggle()">숨겨진 요소 토글</button>
+    <div id="mydiv">이것은 숨겨진 div요소입니다</div>
+    <script>
+      function showhide_toggle() {
+        const div = document.querySelector("#mydiv");
+        div.classList.toggle("show");
+      }
+    </script>
+  </body>
+</html>

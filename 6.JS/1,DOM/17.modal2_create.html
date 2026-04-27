@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/6.JS/1,DOM/css/modal.css" />
+  </head>
+  <body>
+    <h1>홈페이지 인사말</h1>
+    <p>우리 홈페이지 소개 내용</p>
+    <p>우리 홈페이지 소개 내용</p>
+    <p>우리 홈페이지 소개 내용</p>
+    <button id="open">모달열기</button>
+
+    <!-- <div class="modal-wrapper" style="display: none">
+      <div class="modal">
+        <div class="modal-title">안녕하세요</div>
+        <p>모달에 입력할 내용을 작성</p>
+        <div class="close-wrapper">
+          <button id="close">닫기</button>
+        </div>
+      </div>
+    </div> -->
+
+    <script>
+      const open = document.getElementById("open");
+
+      open.onclick = () => {
+        // 1. 모달 생성
+        const modalWrapper = document.createElement("div");
+        modalWrapper.className = "modal-wrapper"; // display: none 제거!
+
+        // 2. 내부 HTML (modal-wrapper 중첩 제거)
+        modalWrapper.innerHTML = `
+    <div class="modal">
+      <div class="modal-title">안녕하세요</div>
+      <p>모달에 입력할 내용을 작성</p>
+      <div class="close-wrapper">
+        <button id="close">닫기</button>
+      </div>
+    </div>
+  `;
+
+        // 3. DOM에 추가 (onclick 안으로!)
+        document.body.appendChild(modalWrapper);
+
+        // 4. 닫기 버튼 이벤트 (appendChild 이후에 등록해야 요소가 존재함)
+        document.getElementById("close").onclick = () => {
+          modalWrapper.remove();
+        };
+      };
+    </script>
+  </body>
+</html>

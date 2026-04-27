@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        padding: 10px;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <table id="table1">
+      <tr>
+        <td>셀1</td>
+        <td>셀2</td>
+        <td>셀3</td>
+      </tr>
+      <tr>
+        <td>셀4</td>
+        <td>셀5</td>
+        <td>셀6</td>
+      </tr>
+      <tr>
+        <td>셀7</td>
+        <td>셀8</td>
+        <td>셀9</td>
+      </tr>
+    </table>
+    <hr />
+    <table id="table2">
+      <tr>
+        <td>셀1</td>
+        <td>셀2</td>
+      </tr>
+      <tr>
+        <td>셀3</td>
+        <td>셀4</td>
+      </tr>
+    </table>
+
+    <button onclick="changeOddcells()">홀수셀 색상 변경</button>
+    <button onclick="changeEnevcells()">짝수셀 색상 변경</button>
+
+    <script>
+      function changeOddcells() {
+        const table1 = document.getElementById("table1");
+        const cells = table1.getElementsByTagName("td");
+        for (let i = 0; i < cells.length; i++) {
+          if (i % 2 == 0) {
+            cells[i].style.backgroundColor = "lightgreen";
+          }
+        }
+      }
+      function changeEnevcells() {
+        // const table2 = document.getElementById("table2");
+        // const cells = table2.getElementsByTagName("td");
+        const cells = document.querySelectorAll("#table2 td");
+
+        cells.forEach((cell, index) => {
+          if (index % 2 == 1) {
+            cell.style.backgroundColor = "pink";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
