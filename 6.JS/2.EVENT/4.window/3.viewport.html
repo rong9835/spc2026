@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #sizeInfo {
+        font-size: 18px;
+        line-height: 1.6;
+        background-color: #f0f0f0;
+        padding: 15px;
+        border-radius: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>당신의 화면 정보는 다음과 같습니다</h1>
+    <div id="sizeInfo"></div>
+    <script>
+      function updateWindowInfo() {
+        const innerWidth = window.innerWidth;
+        const innerHeight = window.innerHeight;
+        const outerWidth = window.outerWidth;
+        const outerHeight = window.outerHeight;
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+
+        const sizeInfo = document.getElementById('sizeInfo');
+        sizeInfo.innerHTML = `
+        <strong>뷰포트(viewport) = window.inner</strong><br>
+        Width: ${innerWidth} px <br>
+        Height: ${innerHeight} px <br>
+        <strong>브라우저 크기 = window.outer </strong><br>
+        Width: ${outerWidth} px <br> 
+        Height: ${outerHeight} px <br>
+        <strong>화면 해상도</strong> <br>
+        Width: ${screenWidth} px <br>
+        Height: ${screenHeight} px <br>
+        `;
+      }
+
+      window.addEventListener('load', () => {
+        //타이밍이슈 (타이밍 버그)
+        setTimeout(updateWindowInfo, 50); //50ms 딜레이를 통해서브라우저의 랜더러가 올바르게 초기화가 된 이후에 .. 계산
+      });
+      updateWindowInfo(); // 화면 최초 로딩시에 표시하기 위해서 1회 수동 호출
+      window.addEventListener('resize', updateWindowInfo);
+    </script>
+  </body>
+</html>

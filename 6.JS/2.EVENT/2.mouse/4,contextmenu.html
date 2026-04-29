@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #myButton {
+        height: 100px;
+        background-color: lightblue;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="myButton">우클릭하시오</button>
+    <script>
+      document
+        .getElementById('myButton')
+        .addEventListener('contextmenu', (ev) => {
+          ev.preventDefault(); //  기본 기능을 하지 못하게 함
+          console.log('우클릭은 성공함');
+        });
+      document.addEventListener('contextmenu', (ev) => {
+        ev.preventDefault();
+        alert('우리사이트에서는 우클릭이 막혀있습니다');
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>숫자 맞추기 게임</h1>
+    <h2>1~100 까지의 숫자를 맞춰보세요</h2>
+    <input type="number" id="guessNumber" placeholder="숫자를 입력하시오" />
+    <button id="guessButton" onclick="guessNumber()">Guess</button>
+    <p id="result"></p>
+    <ul id="historyList"></ul>
+
+    <script>
+      const randomNumber = Math.floor(Math.random() * 100) + 1;
+      console.log('생성한 숫자:', randomNumber);
+
+      const result = document.getElementById('result');
+      const historyList = document.getElementById('historyList');
+      let attemptCount = 0;
+
+      function guessNumber() {
+        let inputNumber = parseInt(
+          document.getElementById('guessNumber').value
+        );
+
+        // 빈 입력 방어
+        if (isNaN(inputNumber)) return;
+
+        attemptCount++;
+
+        if (inputNumber > randomNumber) {
+          result.textContent = '숫자가 큽니다. 더 작은 숫자를 입력해주세요';
+        } else if (inputNumber < randomNumber) {
+          result.textContent = '숫자가 작아요, 더 큰 숫자를 입력해주세요';
+        } else {
+          result.textContent = `축하합니다! 정답을 ${attemptCount}번 만에 맞췄습니다 `;
+          document.getElementById('guessButton').disabled = true;
+        }
+
+        // 히스토리에 새 항목 추가
+        const li = document.createElement('li');
+        li.textContent = `${attemptCount}번째 시도: ${inputNumber} → ${result.textContent}`;
+        historyList.appendChild(li);
+
+        // 입력창 초기화
+        document.getElementById('guessNumber').value = '';
+      }
+    </script>
+  </body>
+</html>

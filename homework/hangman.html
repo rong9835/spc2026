@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>5 Words Hangman</h1>
+    <div id="wordDisplay">_ _ _ _ _</div>
+    <div id="wrongCount">남은 기회: 6</div>
+    <div id="usedLetters">사용한 글자:</div>
+    <input id="input" type="text" maxlength="1" placeholder="글자 입력" />
+    <button id="guessBtn">맞추기</button>
+    <button id="newGameBtn">새 게임</button>
+    <div id="message">알파벳 한 글자씩 맞춰보세요!</div>
+    <script>
+      const words = [
+        'apple',
+        'bread',
+        'chair',
+        'dance',
+        'earth',
+        'blend',
+        'crisp',
+        'dwarf',
+        'flask',
+        'graph',
+        'glyph',
+        'lymph',
+        'nymph',
+        'tryst',
+        'whisk',
+      ];
+
+      const wordDisplay = document.getElementById('wordDisplay');
+      const wrongCount = document.getElementById('wrongCount');
+      const usedLetters = document.getElementById('usedLetters');
+      const guessBtn = document.getElementById('guessBtn');
+      const newGameBtn = document.getElementById('newGameBtn');
+      const message = document.getElementById('message');
+      const input = document.getElementById('input');
+
+      let answer = '';
+      let guessed = [];
+      let mistakes = 0;
+      const maxWrong = 6;
+      let displayWord = ['_', '_', '_', '_', '_'];
+      function startGame() {
+        const randomIndex = Math.floor(Math.random() * words.length);
+        answer = words[randomIndex];
+        guessed = [];
+        mistakes = 0;
+        displayWord = ['_', '_', '_', '_', '_'];
+
+        let display = '';
+        for (let i = 0; i < answer.length; i++) {
+          display = display + '_ ';
+        }
+        wordDisplay.textContent = display;
+      }
+      guessBtn.addEventListener('click', () => {
+        if (mistakes >= maxWrong) return;
+        const letter = input.value;
+        if (answer.includes(letter)) {
+          for (let i = 0; i < answer.length; i++) {
+            if (answer[i] === letter) {
+              displayWord[i] = letter;
+            }
+          }
+          wordDisplay.textContent = displayWord.join(' ');
+          if (!displayWord.includes('_')) {
+            message.textContent = '정답! ' + answer + ' 맞췄어요!';
+          }
+        } else {
+          mistakes = mistakes + 1;
+          if (mistakes === maxWrong) {
+            message.textContent = '게임 오버! 정답은 ' + answer + ' 였어요!';
+            return;
+          }
+          wrongCount.textContent = '남은 기회: ' + (maxWrong - mistakes);
+        }
+      });
+      newGameBtn.addEventListener('click', startGame);
+      startGame();
+    </script>
+  </body>
+</html>

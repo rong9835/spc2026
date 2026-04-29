@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>이미지 갤러리</h1>
+    <div class="gallery">
+      <img id="img1" src="/6.JS/3.MINIAPP/images/movie1.jpeg" width="100px" />
+      <img id="img2" src="/6.JS/3.MINIAPP/images/movie2.jpeg" width="100px" />
+      <img id="img3" src="/6.JS/3.MINIAPP/images/movie3.jpeg" width="100px" />
+    </div>
+    <img id="large-image" width="400px" />
+
+    <!-- 방법1 -->
+
+    <script>
+      // const img1 = document.getElementById('img1');
+      // const img2 = document.getElementById('img2');
+      // const img3 = document.getElementById('img3');
+
+      // const imgs = [img1, img2, img3];
+
+      // imgs.forEach((img) => {
+      //   img.addEventListener('click', () => {
+      //     const large = document.getElementById('large-image');
+      //     large.src = img.src;
+      //     large.width = '400';
+      //   });
+      // });
+
+      const large = document.getElementById('large-image');
+
+      // .gallery 안의 img 전체를 한 번에 선택
+      const imgs = document.querySelectorAll('.gallery img');
+
+      imgs.forEach((img) => {
+        img.addEventListener('click', () => {
+          large.src = img.src;
+        });
+      });
+    </script>
+  </body>
+</html>

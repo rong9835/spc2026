@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>브라우저 정보</h1>
+    <p>GPS좌표:<span id="geo"></span></p>
+    <button id="getLocation">위치정보조회</button>
+    <script>
+      document.getElementById('getLocation').addEventListener('click', () => {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          document.getElementById(
+            'geo'
+          ).textContent = `위도 ${latitude} 경도 ${longitude}`;
+        });
+      });
+    </script>
+  </body>
+</html>

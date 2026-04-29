@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #grandparent {
+        padding: 50px;
+        background-color: lightblue;
+      }
+      #parent {
+        padding: 50px;
+        background-color: lightcoral;
+      }
+      #child {
+        padding: 50px;
+        background-color: lightgoldenrodyellow;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="grandparent">
+      grandparent
+      <div id="parent">
+        parent
+        <div id="child">child</div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const child = document.getElementById('child');
+        const parent = document.getElementById('parent');
+        const grandparent = document.getElementById('grandparent');
+
+        child.addEventListener('click', (ev) => {
+          alert('child클릭됨');
+          ev.stopPropagation();
+        });
+        parent.addEventListener('click', () => {
+          alert('parent클릭됨');
+        });
+        grandparent.addEventListener('click', () => {
+          alert('grandparent클릭됨');
+        });
+      });
+    </script>
+  </body>
+</html>

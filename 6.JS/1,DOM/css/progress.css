@@ -1,0 +1,15 @@
+#progressBar {
+  width: 100%;
+  background-color: lightblue;
+}
+#progress {
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(to right, #770000, #fde0e0);
+  transition: width 0.5s ease-out;
+}
+#progressText {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+}

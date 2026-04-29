@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+    
+    </style>
+  </head>
+  <body>
+    <input id="myInput" placeholder="여기 글자를 입력하세요" />
+    <script>
+      document.getElementById('myInput').addEventListener('focus', () => {
+        console.log('입력창 활성화');
+      });
+
+      document.getElementById('myInput').addEventListener('blur', () => {
+        console.log('입력창 비활성화됨');
+      });
+    </script>
+  </body>
+</html>

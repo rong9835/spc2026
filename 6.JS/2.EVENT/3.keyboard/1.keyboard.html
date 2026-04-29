@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="text" id="myInput" placeholder="키를 입력하시오" />
+    <script>
+      document.getElementById('myInput').addEventListener('keydown', (ev) => {
+        console.log('키가 입력됨:', ev.key);
+      });
+
+      document.getElementById('myInput').addEventListener('keyup', (ev) => {
+        console.log('키가 입력이 끝남:', ev.key);
+      });
+    </script>
+  </body>
+</html>

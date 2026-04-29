@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #myButton {
+        height: 100px;
+        background-color: lightblue;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="myButton">마우스를올려보세요</button>
+    <script>
+      document.getElementById('myButton').addEventListener('mouseover', () => {
+        console.log('마우스가 올라갔어요');
+      });
+      document.getElementById('myButton').addEventListener('mouseout', () => {
+        console.log('마우스가 나갔어요');
+      });
+      document
+        .getElementById('myButton')
+        .addEventListener('mousemove', (ev) => {
+          console.log(`마우스의 정보: ${event.clientX}:${event.clientY}}`);
+        });
+    </script>
+  </body>
+</html>

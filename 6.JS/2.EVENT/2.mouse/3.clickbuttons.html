@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="mybutton">클릭하시오</button>
+    <script>
+      // document.getElementById('mybutton').addEventListener('mousedown', () => {console.log('클릭ok');});
+      document
+        .getElementById('mybutton')
+        .addEventListener('mousedown', (event) => {
+          console.log('버튼눌림', event);
+
+          switch (event.button) {
+            case 0: //왼쪽버튼
+              console.log('왼쪽 버튼 눌림');
+              break;
+            case 1: //미들버튼
+              console.log('가운데 버튼 눌림');
+              break;
+            case 2: //오른쪽버튼
+              console.log('오른쪽 버튼 눌림');
+              break;
+          }
+        });
+    </script>
+  </body>
+</html>

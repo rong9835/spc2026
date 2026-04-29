@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #dropZone {
+        width: 200px;
+        height: 200px;
+        border: 2px dashed #cccccc;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        background-color: #f9f9f9f9;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dropZone">여기에 파일을 드래그 하세요</div>
+    <div id="fileList">
+      <h3>드롭된 파일 목록:</h3>
+      <ul id="fileNames"></ul>
+    </div>
+
+    <script>
+      const dropZone = document.getElementById('dropZone');
+      const fileNames = document.getElementById('fileNames');
+
+      // 위에 파일이 올라갔을 때
+      dropZone.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+        dropZone.style.backgroundColor = '#ff8787';
+      });
+
+      // 다시 나갔을 때
+      dropZone.addEventListener('dragleave', (ev) => {
+        ev.preventDefault();
+        dropZone.style.backgroundColor = '#f9f9f9';
+      });
+
+      //파일을 놓았을 떄
+      dropZone.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        dropZone.style.backgroundColor = '#6bff6b';
+
+        const files = ev.dataTransfer.files;
+        // console.log(files)
+
+        if (files.length > 0) {
+          // for (let i = 0; i < files.length; i++) {
+          //   const li = document.createElement('li');
+          //   li.textContent = files[i].name;
+          //   fileNames.appendChild(li);
+          // }
+
+          // forEach가 없는 리스트 유형들은 배열로 타입변환(type casting)을 해줌
+          // Array.from(files).forEach((file) => {
+          //   const li = document.createElement('li');
+          //   li.textContent = file.name;
+          //   fileNames.appendChild(li);
+          // });
+
+          // 리스트를 풀어해치는 스프레드 연산자(...)으로 풀었다가 다시 [] 리스트로 묶음
+          [...files].forEach((file) => {
+            const li = document.createElement('li');
+            li.textContent = files[i].name;
+            fileNames.appendChild(li);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

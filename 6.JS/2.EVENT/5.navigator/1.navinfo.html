@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>브라우저 정보</h1>
+    <p>UserAgent:<span id="userAgent"></span></p>
+    <p>Language: <span id="language"></span></p>
+    <p>인터넷 연결상태: <span id="onlinestateus"></span></p>
+    <script>
+      document.getElementById('userAgent').textContent = navigator.userAgent;
+      document.getElementById('language').textContent = navigator.language;
+      document.getElementById('onlinestateus').textContent = navigator.onLine;
+    </script>
+  </body>
+</html>
