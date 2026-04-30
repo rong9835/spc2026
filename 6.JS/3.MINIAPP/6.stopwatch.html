@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .stopwatch-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 2rem;
+        max-width: 340px;
+        margin: 1.5rem auto;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        gap: 2rem;
+      }
+
+      #display {
+        font-family: 'Courier New', monospace;
+        font-size: 52px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: #1a1a1a;
+        line-height: 1;
+      }
+
+      .button-container {
+        display: flex;
+        gap: 12px;
+      }
+
+      .button-container button {
+        width: 80px;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid #d0d0d0;
+        background: #f5f5f5;
+        color: #1a1a1a;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+      }
+
+      .button-container button:hover {
+        background: #e8e8e8;
+      }
+
+      .button-container button:active {
+        transform: scale(0.97);
+      }
+
+      #startButton {
+        color: #1a7f4b;
+        border-color: #a8d5bc;
+      }
+
+      #stopButton {
+        color: #c0392b;
+        border-color: #f5b8b4;
+      }
+
+      #resetButton {
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 스톱워치 전체 -->
+    <div class="stopwatch-box">
+      <!-- 스톱워치 표시 영역 -->
+      <div id="display">00:00:00</div>
+      <!-- 스탑워치 버튼 컨테이너 -->
+      <div class="button-container">
+        <button id="startButton">시작</button>
+        <button id="stopButton">정지</button>
+        <button id="resetButton">초기화</button>
+      </div>
+    </div>
+    <script>
+      const display = document.getElementById('display');
+      const startButton = document.getElementById('startButton');
+      const stopButton = document.getElementById('stopButton');
+      const resetButton = document.getElementById('resetButton');
+      let startTime; // 스톱워치 시작 시간
+      let difference = 0; // 경과시간
+      let isRunning = false;
+      let timerId;
+
+      function startTimer() {
+        if (isRunning) return;
+        isRunning = true;
+
+        startTime = new Date().getTime();
+        timerId = setInterval(updateTimer, 10);
+      }
+      function updateTimer() {
+        updateTime = new Date().getTime();
+        difference = updateTime - startTime; // 경과시간계산
+
+        let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)); //흘러간 ms에서 분계산
+        let seconds = Math.floor((difference % (1000 * 60)) / 1000); //거기에서 초계산
+        let milliseconds = Math.floor((difference % 1000) / 10); //나머지 ms 계산
+
+        display.textContent = display.textContent = `${String(minutes).padStart(
+          2,
+          '0'
+        )}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(
+          2,
+          '0'
+        )}`;
+      }
+
+      function stopTimer() {
+        // 시간을 멈춰야함
+        clearInterval(timerId);
+      }
+      function resetTimer() {
+        clearInterval(timerId);
+        let difference = 0;
+        let isRunning = false;
+        display.textContent = '00:00:00';
+      }
+
+      startButton.addEventListener('click', startTimer);
+      stopButton.addEventListener('click', stopTimer);
+      resetButton.addEventListener('click', resetTimer);
+    </script>
+  </body>
+</html>

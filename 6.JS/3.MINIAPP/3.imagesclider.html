@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      h1 {
+        text-align: center;
+      }
+      .slider {
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        text-align: center;
+        max-width: 600px;
+        align-items: center;
+      }
+
+      .slider img {
+        height: 300px;
+        display: none;
+      }
+
+      .slider img.active {
+        display: block;
+      }
+      .buttons {
+        margin-top: 20px;
+      }
+      button {
+        padding: 10px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>이미지 슬라이더</h1>
+    <div class="slider">
+      <img id="img1" src="/6.JS/3.MINIAPP/images/movie1.jpeg" class="active" />
+      <img id="img2" src="/6.JS/3.MINIAPP/images/movie2.jpeg" />
+      <img id="img3" src="/6.JS/3.MINIAPP/images/movie3.jpeg" />
+
+      <div class="filename" id="filename">
+        /6.JS/3.MINIAPP/images/movie1.jpeg
+      </div>
+      <div id="buttons">
+        <button id="prevBtn">이전</button>
+        <button id="nextBtn">다음</button>
+      </div>
+    </div>
+
+    <script>
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const slider = document.getElementById('slider');
+      const img1 = document.getElementById('img1');
+      const img2 = document.getElementById('img2');
+      const img3 = document.getElementById('img3');
+      const imgs = [img1, img2, img3];
+      const filename = document.getElementById('filename');
+      let currentIndex = 0;
+
+      function slideImg(direction) {
+        imgs[currentIndex].classList.remove('active');
+        if (direction === 'next') {
+          currentIndex = (currentIndex + 1) % imgs.length;
+        } else {
+          currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
+        }
+        imgs[currentIndex].classList.add('active');
+      }
+
+      nextBtn.addEventListener('click', () => {
+        slideImg('next');
+      });
+      prevBtn.addEventListener('click', () => {
+        slideImg('prev');
+      });
+    </script>
+  </body>
+</html>

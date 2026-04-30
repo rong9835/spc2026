@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      input {
+        padding: 10px;
+        font-size: 16px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        padding: 5px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>실시간 검색 필터</h1>
+    <input type="text" id="searchInput" placeholder="검색어를 입력하시오" />
+    <ul id="itemList">
+      <li>apple</li>
+      <li>banana</li>
+      <li>cherry</li>
+      <li>grape</li>
+      <li>mango</li>
+      <li>peach</li>
+      <li>plum</li>
+      <li>pear</li>
+      <li>lemon</li>
+      <li>lime</li>
+      <li>orange</li>
+      <li>melon</li>
+      <li>kiwi</li>
+      <li>fig</li>
+      <li>date</li>
+      <li>guava</li>
+      <li>papaya</li>
+      <li>coconut</li>
+      <li>strawberry</li>
+      <li>blueberry</li>
+    </ul>
+
+    <script>
+      const searchInput = document.getElementById('searchInput');
+      const itemList = document.getElementById('itemList');
+      searchInput.addEventListener('input', search);
+
+      function search() {
+        const keyword = searchInput.value.toLowerCase();
+        const items = itemList.querySelectorAll('li');
+
+        items.forEach(function (item) {
+          const text = item.textContent.toLowerCase();
+          item.style.display = text.includes(keyword) ? 'block' : 'none';
+        });
+      }
+
+      // 디바운스를 구현하기 (settimeout을 사용해서)
+    </script>
+  </body>
+</html>

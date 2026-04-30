@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>TTS 예제</h1>
+    <textarea id="text" rows="4" cols="50"></textarea><br />
+    <div class="controls">
+      <select name="" id="voiceSelect"></select>
+      <button onclick="speak()">읽어주기</button>
+    </div>
+    <script>
+      const voiceSelect = document.getElementById('voiceSelect');
+
+      if ('speechSynthesis' in window) {
+        const updateVoices = () => {
+          const voices = window.speechSynthesis.getVoices();
+          console.log('사용가능한 목소리 목록', voices);
+
+          voiceSelect.innerHTML = '';
+
+          voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.text = `${voice.name}(${voice.lang})`;
+            voiceSelect.add(option);
+          });
+        };
+      }
+      function speak() {
+        const text = document.getElementById('text').value;
+        const speech = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(speech);
+      }
+    </script>
+  </body>
+</html>
