@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+    <script>
+      const canvas = document.getElementById('myCanvas');
+      const context = canvas.getContext('2d');
+
+      // 1. 첫 번째 사각형 (가로 너비를 300으로 늘림)
+      context.fillStyle = '#ff0000';
+      context.fillRect(50, 50, 200, 100); // (x, y, 가로, 세로)
+
+      // 2. 두 번째 사각형 (첫 번째 사각형 바로 아래(y=150)에 배치)
+      context.fillStyle = '#0000ff';
+      context.fillRect(50, 150, 200, 100);
+
+      // 라인 그리기
+      context.strokeStyle = '#00ff00';
+      context.lineWidth = 5; //선굵기
+      context.beginPath();
+      context.moveTo(150, 50);
+      context.lineTo(250, 150);
+      context.lineTo(150, 250);
+      context.lineTo(50, 150);
+      context.lineTo(150, 50);
+      context.stroke();
+      context.closePath();
+
+      //원 그리기
+
+      // 1. 검은색 바탕 원
+      context.fillStyle = '#000000';
+      context.beginPath();
+      context.arc(350, 50, 30, 0, 2 * Math.PI);
+      context.fill();
+      context.closePath();
+
+      // 2. 하늘색 원 (부채꼴 모양)
+      context.fillStyle = 'skyblue';
+      context.beginPath();
+      context.arc(350, 150, 30, 1.2 * Math.PI, (3 / 2) * Math.PI);
+      context.fill();
+      context.closePath();
+    </script>
+  </body>
+</html>

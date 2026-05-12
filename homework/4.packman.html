@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        border: 1px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+    <script>
+      const canvas = document.getElementById('myCanvas');
+      const context = canvas.getContext('2d');
+
+      // 1. 변수 선언 (맨 위)
+      let x = 300;
+      let y = 150;
+      const speed = 5;
+
+      // 2. draw 함수 정의
+      function draw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.beginPath();
+        context.moveTo(x, y);
+        let startAngle = (1 / 4) * Math.PI;
+        let endAngle = 2 * Math.PI - (1 / 4) * Math.PI;
+        context.arc(x, y, 50, startAngle, endAngle);
+        context.lineTo(x, y);
+        context.fillStyle = 'yellow';
+        context.fill();
+        context.stroke();
+        context.closePath();
+      }
+
+      // 3. 키보드 이벤트
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') y -= speed;
+        if (e.key === 'ArrowDown') y += speed;
+        if (e.key === 'ArrowLeft') x -= speed;
+        if (e.key === 'ArrowRight') x += speed;
+        draw();
+      });
+
+      // 4. 최초 실행
+      draw();
+    </script>
+  </body>
+</html>

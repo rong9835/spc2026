@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="aniCanvas" width="400" height="200"></canvas>
+
+    <script>
+      const canvas = document.getElementById('aniCanvas');
+      const context = canvas.getContext('2d');
+
+      const graphData = {
+        A: 10,
+        B: 20,
+        C: 40,
+        D: 60,
+        E: 100,
+      };
+
+      let startX = 50;
+      const barHeightOffest = 20;
+
+      drawBarGraph(graphData);
+
+      function drawBarGraph(data) {
+        const barWidth = 30;
+
+        for (const key in data) {
+          const barHeight = data[key];
+          context.fillStyle = 'blue';
+          context.fillRect(
+            startX,
+            canvas.height - barHeight - barHeightOffest,
+            barWidth,
+            barHeight
+          );
+          context.fillStyle = 'black';
+          context.fillText(key, startX + barWidth / 2, canvas.height - 10);
+          startX += 50;
+        }
+      }
+    </script>
+  </body>
+</html>
