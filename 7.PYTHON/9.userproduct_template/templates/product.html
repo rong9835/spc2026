@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>상품 조회</h1>
+
+    <form>
+        <label>상품코드: <input type="number" name="id" value="{{ request.args.get('id', '') }}"></label>
+        <label>상품명: <input type="name" name="name" value="{{ request.args.get('name', '') }}"></label>
+        <button type="submit">검색</button>
+    </form>
+
+    {% if results %}
+        <ul>
+        {% for p in results %}
+            <li>상품코드: <a href="/product?id={{ p.id }}">{{ p.id }},</a> 상품명: {{ p.name }}, 상품가격: {{ p.price }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <ul>
+            <li>조건에 맞는 상품은 없습니다.</li>
+        </ul>
+    {% endif %}
+</body>
+</html>
