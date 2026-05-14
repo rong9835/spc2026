@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <label for="breed">품종:</label>
+    <select id="breed" name="breed"></select>
+
+    <label for="SubBreed">하위품종:</label>
+    <select id="SubBreed" name="breed"></select>
+
+    <button id="dogBtn">클릭</button>
+    <div id="dogImg"></div>
+
+    <script>
+      // 페이지 로드 시 전체 품종 목록을 API에서 불러와 셀렉트박스에 추가
+      async function loadBreeds() {
+        const resp = await fetch(`https://dog.ceo/api/breeds/list/all`);
+        const data = await resp.json();
+        const dataKey = Object.keys(data.message); // 품종 이름만 배열로 추출
+        dataKey.forEach((breed) => {
+          const option = document.createElement('option');
+          option.textContent = breed;
+          option.value = breed;
+          const select = document.getElementById('breed');
+          select.appendChild(option);
+        });
+      }
+      loadBreeds();
+
+      // 품종 셀렉트박스에서 품종을 바꿀 때마다 하위품종 목록 불러오기
+      document.getElementById('breed').addEventListener('change', async () => {
+        const selectedBreed = document.getElementById('breed').value;
+        const subBreed = await fetch(`https://dog.ceo/api/breed/${selectedBreed}/list`);
+        const subBreedData = await subBreed.json();
+
+        const SubDataKey = subBreedData.message;
+        if (subBreedData.message.length === 0) {
+          // 하위품종이 없는 경우 안내 텍스트 표시
+          const option = document.createElement('option');
+          option.textContent = '하위품종 없음';
+          document.getElementById('SubBreed').appendChild(option);
+        } else {
+          // 하위품종 목록을 셀렉트박스에 추가
+          SubDataKey.forEach((breed) => {
+            const option = document.createElement('option');
+            option.textContent = breed;
+            option.value = breed;
+            const select = document.getElementById('SubBreed');
+            select.appendChild(option);
+          });
+        }
+      });
+
+      // 클릭 버튼 누를 때 선택한 품종/하위품종에 맞는 랜덤 이미지 불러오기
+      document.getElementById('dogBtn').addEventListener('click', async () => {
+        const selectedBreed = document.getElementById('breed').value;
+        const selectedSubBreed = document.getElementById('SubBreed').value;
+
+        if (selectedSubBreed === '하위품종 없음' || selectedSubBreed === '') {
+          // 하위품종 없을 때 - 품종만으로 이미지 요청
+          const dogImgResp = await fetch(`https://dog.ceo/api/breed/${selectedBreed}/images/random`);
+          const dogImgData = await dogImgResp.json();
+          document.getElementById('dogImg').innerHTML = `<img src="${dogImgData.message}" width="300px">`;
+        } else {
+          // 하위품종 있을 때 - 품종 + 하위품종으로 이미지 요청
+          const dogImgResp = await fetch(`https://dog.ceo/api/breed/${selectedBreed}/${selectedSubBreed}/images/random`);
+          const dogImgData = await dogImgResp.json();
+          document.getElementById('dogImg').innerHTML = `<img src="${dogImgData.message}" width="300px">`;
+        }
+      });
+    </script>
+  </body>
+</html>
