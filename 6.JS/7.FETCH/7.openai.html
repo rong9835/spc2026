@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="text" id="prompt" placeholder="질문을 입력하세요" />
+    <button id="sendBtn">전송</button>
+    <div id="result"></div>
+    <script>
+      document.getElementById('sendBtn').addEventListener('click', async () => {
+        const resp = await fetch('https://api.openai.com/v1/models', {
+          headers: {
+            Authorization: 'Bearer 여기에키를입력하시오',
+          },
+        });
+        const data = await resp.json();
+
+        console.log(data);
+        document.getElementById('result').innerHTML = `
+          ${JSON.stringify(data)}`;
+      });
+    </script>
+  </body>
+  <script></script>
+</html>

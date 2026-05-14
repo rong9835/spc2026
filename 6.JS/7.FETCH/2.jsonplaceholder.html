@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style></style>
+</head>
+<body>
+    <h1>외부 요청 테스트</h1>
+    <button id="loadBtn">데이터 요청</button>
+    <div id="result"><!--응답 데이터를 표시할곳--></div>
+    <script>
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            fetch('https://jsonplaceholder.typicode.com/todos/1').then((response) => {
+                if (!response.ok) {
+                    console.log("응답은 왔으나, OK가 아님.", response);
+                    throw new Error("알수 없는 오류가 발생했습니다.");
+                }
+                console.log("성공적인 응답이 왔음. 응답은 여기 담겨있음: ", response)
+                return response.json();  // 온 응답이 JSON이니깐, 그걸로 자료구조를 만들어라
+            }).then((data) => {
+                console.log("최종 파싱이 끝난 JSON자료구조가 넘어옴: ", data)
+            }).catch((error) => {
+                console.log("위에 fetch를 처리하고 가공하는 과정중 어딘가에서 오류가 났음: ", error)
+            })
+
+        })
+    </script>
+</body>
+</html>

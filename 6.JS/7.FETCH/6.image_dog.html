@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- 1. 버튼을 클릭하면, 이미지를 화면에 출력한다. -->
+    <!-- 요청해야할 주소는 dog.ceo 에 방문해서 random 강아지 사진을 받아오는 스펙을 찾아서.. -->
+
+    <p id="dogImg"></p>
+    <button id="btn">버튼</button>
+  </body>
+  <script>
+    document.getElementById('btn').addEventListener('click', () => {
+      fetch('https://dog.ceo/api/breeds/image/random')
+        .then((response) => response.json())
+        .then((data) => {
+          displayResult(data);
+        });
+
+      function displayResult(data) {
+        const result = document.getElementById('dogImg');
+        console.log(data);
+        result.innerHTML = `
+        <img src="${data.message}" width="300px">
+      `;
+      }
+    });
+  </script>
+</html>

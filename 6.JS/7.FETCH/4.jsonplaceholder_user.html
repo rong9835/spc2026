@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style></style>
+</head>
+<body>
+    <h1>외부 요청 테스트</h1>
+    <input type="number" id="uid">
+    <button id="loadBtn">데이터 요청</button>
+    <div id="result"><!--응답 데이터를 표시할곳--></div>
+    <script>
+        
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            const userid = document.getElementById('uid').value;
+            console.log("사용자id:", userid);
+
+            fetch(`https://jsonplaceholder.typicode.com/users/${userid}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `
+                        <ul>
+                            <li>사용자ID: ${data.id}</li>
+                            <ul>
+                                <li>이름: ${data.name}</li>
+                                <li>전화번호: ${data.phone}</li>
+                                <li>웹사이트: ${data.website}</li>
+                            </ul>
+                        </ul>
+                    `;
+                })
+                .catch((error) => {
+                    console.log("위에 fetch를 처리하고 가공하는 과정중 어딘가에서 오류가 났음: ", error)
+                })
+        });
+    </script>
+</body>
+</html>
