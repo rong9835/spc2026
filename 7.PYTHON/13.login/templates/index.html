@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>로그인</h1>
+    {% if user %}
+        <h2>안녕하세요, {{ user.name }} 님</h2>
+    {% else %}
+        <form method="POST">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id">
+            <br>
+            
+            <label for="pw">PW:</label>
+            <input type="password" id="pw" name="pw">
+            <br>
+
+            <input type="submit" value="로그인">
+        </form>
+        {% if error %}
+            <p style="color:red">{{ error }}</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
