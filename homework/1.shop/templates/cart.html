@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}장바구니{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="fw-bold mb-1"><i class="bi bi-cart-fill text-warning me-2"></i>장바구니</h2>
+  <p class="text-muted small mb-0">담으신 상품을 확인해보세요</p>
+</div>
+
+{% if cart_items %}
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-dark">
+      <tr>
+        <th class="py-3 px-4">상품명</th>
+        <th class="py-3 text-center">수량</th>
+        <th class="py-3 text-end">가격</th>
+        <th class="py-3 text-center">삭제</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item_id, item in cart_items.items() %}
+      <tr>
+        <td class="px-4 py-3 fw-semibold">{{ item.name }}</td>
+        <td class="text-center">
+          <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">
+            {{ item.quantity }}개
+          </span>
+        </td>
+        <td class="text-end fw-bold text-dark pe-4">
+          {{ (item.price * item.quantity) | int }}원
+        </td>
+        <td class="text-center">
+          <a
+            href="/remove/{{ item_id }}"
+            class="btn btn-sm btn-outline-danger rounded-3"
+            onclick="return confirm('{{ item.name }}을(를) 삭제할까요?')"
+          >
+            <i class="bi bi-trash3-fill"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mt-3 p-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <span class="fw-bold fs-5">총 결제 금액</span>
+    <span class="fw-bold fs-4 text-warning">{{ total_price | int }}원</span>
+  </div>
+  <hr />
+  <div class="d-flex gap-2 justify-content-end">
+    <a href="/list" class="btn btn-outline-dark rounded-3">
+      <i class="bi bi-arrow-left me-1"></i>쇼핑 계속하기
+    </a>
+    <button class="btn btn-warning fw-bold rounded-3 px-4">
+      <i class="bi bi-credit-card me-1"></i>결제하기
+    </button>
+  </div>
+</div>
+
+{% else %}
+<div class="text-center py-5 my-4">
+  <i class="bi bi-cart-x text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+  <h4 class="fw-bold mt-4 text-muted">장바구니가 비어있어요</h4>
+  <p class="text-muted mb-4">마음에 드는 상품을 담아보세요!</p>
+  <a href="/list" class="btn btn-warning btn-lg fw-bold rounded-pill px-5">
+    <i class="bi bi-grid-fill me-2"></i>상품 보러가기
+  </a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}홈페이지{% endblock %}
+
+{% block content %}
+<div class="text-center py-5 my-4">
+  <div class="mb-3">
+    <i class="bi bi-bag-heart-fill text-warning" style="font-size: 4rem;"></i>
+  </div>
+  <h1 class="display-5 fw-bold">안녕하세요, <span class="text-warning">{{ user.name }}</span>님! 👋</h1>
+  <p class="lead text-muted mt-2 mb-4">오늘도 맛있는 음식을 골라보세요!</p>
+  <div class="d-flex justify-content-center gap-3 flex-wrap">
+    <a href="/list" class="btn btn-warning btn-lg fw-bold px-4 rounded-pill shadow-sm">
+      <i class="bi bi-grid-fill me-2"></i>상품 보러가기
+    </a>
+    <a href="/cart" class="btn btn-outline-dark btn-lg fw-bold px-4 rounded-pill">
+      <i class="bi bi-cart-fill me-2"></i>장바구니 확인
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mt-2">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100 text-center p-3">
+      <div class="card-body">
+        <i class="bi bi-emoji-smile text-warning" style="font-size: 2.5rem;"></i>
+        <h5 class="fw-bold mt-3">맛있는 메뉴</h5>
+        <p class="text-muted small">햄버거, 핫도그, 콜라 등<br />다양한 메뉴가 준비되어 있어요</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100 text-center p-3">
+      <div class="card-body">
+        <i class="bi bi-lightning-charge-fill text-warning" style="font-size: 2.5rem;"></i>
+        <h5 class="fw-bold mt-3">빠른 주문</h5>
+        <p class="text-muted small">간편하게 장바구니에 담고<br />빠르게 주문하세요</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100 text-center p-3">
+      <div class="card-body">
+        <i class="bi bi-shield-check-fill text-warning" style="font-size: 2.5rem;"></i>
+        <h5 class="fw-bold mt-3">안전한 결제</h5>
+        <p class="text-muted small">안심하고 이용하실 수 있는<br />안전한 쇼핑 환경</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
