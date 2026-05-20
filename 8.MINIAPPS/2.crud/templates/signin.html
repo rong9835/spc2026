@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Signup Page{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<h2>회원가입</h2>
+<form method="post">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username"><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password"><br>
+    <label for="username">Email:</label>
+    <input type="text" id="email" name="email"><br>
+    <button type="submit">회원가입</button>    
+</form>
+
+{% endblock %}
