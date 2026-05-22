@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}BeatSpace - 최고 관리자 센터{% endblock %}
+
+{% block content %}
+<!-- 대시보드 헤더 타이틀 -->
+<div class="mb-8 relative overflow-hidden">
+    <div class="flex items-center gap-3">
+        <div class="p-3 bg-red-500/10 rounded-2xl border border-red-500/20">
+            <i data-lucide="shield-alert" class="w-8 h-8 text-red-500 animate-pulse"></i>
+        </div>
+        <div>
+            <h2 class="font-outfit font-extrabold text-2xl tracking-wide text-white">통합 최고 관리자 센터</h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">서비스 내 회원 권한 관리, 유해 게시글(음악) 및 부적절 댓글을 원클릭으로 일괄 통제합니다.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 탭 조절 패널 (회원관리 / 음악관리 / 댓글관리) -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+    
+    <!-- 탭 네비게이션 좌측 바 -->
+    <div class="lg:col-span-1 glassmorphism rounded-3xl p-4 border border-white/5">
+        <div class="flex flex-row lg:flex-col gap-1 w-full overflow-x-auto lg:overflow-visible">
+            <button onclick="switchAdminTab('users')" id="admin-tab-btn-users" 
+                class="flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-white bg-red-500/90 shadow-lg">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                <span>회원 계정 관리</span>
+            </button>
+            <button onclick="switchAdminTab('songs')" id="admin-tab-btn-songs" 
+                class="flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-slate-400 hover:text-white hover:bg-white/5">
+                <i data-lucide="music" class="w-4 h-4"></i>
+                <span>게시글(음악) 관리</span>
+            </button>
+            <button onclick="switchAdminTab('comments')" id="admin-tab-btn-comments" 
+                class="flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-slate-400 hover:text-white hover:bg-white/5">
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+                <span>등록 댓글 모니터링</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 우측 관리 패널 리스트 -->
+    <div class="lg:col-span-3 space-y-6">
+        
+        <!-- 패널 1: 회원 계정 관리 -->
+        <div id="admin-panel-users" class="space-y-4">
+            <h3 class="font-outfit font-extrabold text-xl tracking-wide flex items-center gap-2 mb-2">
+                <i data-lucide="users" class="text-red-500 w-5 h-5"></i>
+                회원 계정 전체 관리 목록
+            </h3>
+            
+            <div class="glassmorphism rounded-3xl overflow-hidden border border-white/5">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-obsidian-card/90 border-b border-white/5 text-slate-400 font-bold text-xs uppercase tracking-wider">
+                                <th class="px-6 py-4">ID</th>
+                                <th class="px-6 py-4">회원 아이디</th>
+                                <th class="px-6 py-4">계정 권한 등급</th>
+                                <th class="px-6 py-4">가입 시각</th>
+                                <th class="px-6 py-4 text-right">작업 액션</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for u in users %}
+                                <tr id="admin-user-row-{{ u['id'] }}" class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="px-6 py-4 font-outfit text-slate-400 font-medium">{{ u['id'] }}</td>
+                                    <td class="px-6 py-4 font-bold text-white flex items-center gap-2">
+                                        <i data-lucide="user" class="w-4 h-4 text-slate-500"></i>
+                                        <span>{{ u['username'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span id="role-badge-{{ u['id'] }}" class="text-[10px] font-bold px-2 py-0.5 rounded-full 
+                                            {% if u['role'] == 'admin' %}
+                                                bg-red-500/10 border border-red-500/20 text-red-400
+                                            {% else %}
+                                                bg-slate-500/10 border border-slate-500/20 text-slate-400
+                                            {% endif %}">
+                                            {{ '관리자(ADMIN)' if u['role'] == 'admin' else '일반회원(USER)' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-slate-400 font-medium">{{ u['created_at'] }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        {% if u['id'] == session.get('user_id') %}
+                                            <span class="text-xs text-slate-600 italic font-medium pr-3">본인 계정 제어불가</span>
+                                        {% else %}
+                                            <div class="inline-flex gap-2">
+                                                <button onclick="adminToggleRole({{ u['id'] }})"
+                                                        class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-neon-purple/20 hover:text-neon-purple border border-white/5 transition-all text-slate-300">
+                                                    등급 전환
+                                                </button>
+                                                <button onclick="adminDeleteUser({{ u['id'] }}, '{{ u['username'] }}')"
+                                                        class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all text-red-400">
+                                                    강제 탈퇴
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 패널 2: 게시글(음악) 관리 (숨김) -->
+        <div id="admin-panel-songs" class="space-y-4 hidden">
+            <h3 class="font-outfit font-extrabold text-xl tracking-wide flex items-center gap-2 mb-2">
+                <i data-lucide="music" class="text-red-500 w-5 h-5"></i>
+                등록 게시글(음악) 전체 모니터링 목록
+            </h3>
+
+            <div class="glassmorphism rounded-3xl overflow-hidden border border-white/5">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-obsidian-card/90 border-b border-white/5 text-slate-400 font-bold text-xs uppercase tracking-wider">
+                                <th class="px-6 py-4">곡 썸네일/동영상 ID</th>
+                                <th class="px-6 py-4">음악 제목</th>
+                                <th class="px-6 py-4 text-center">좋아요 수</th>
+                                <th class="px-6 py-4 text-center">의견(댓글) 수</th>
+                                <th class="px-6 py-4">등록 일시</th>
+                                <th class="px-6 py-4 text-right">관리 작업</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for s in songs %}
+                                <tr id="admin-song-row-{{ s['youtube_id'] }}" class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="px-6 py-4 min-w-[120px]">
+                                        <div class="flex items-center gap-3">
+                                            <img src="{{ s['thumbnail_url'] }}" alt="{{ s['title'] }}" class="w-12 h-9 rounded object-cover border border-white/5">
+                                            <span class="text-[10px] text-slate-500 font-outfit block font-medium">{{ s['youtube_id'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 font-semibold text-slate-200">
+                                        <a href="{{ url_for('song_detail', youtube_id=s['youtube_id']) }}" class="hover:text-red-400 transition-colors line-clamp-1">
+                                            {{ s['title'] }}
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-outfit text-neon-pink font-bold">{{ s['like_count'] }}개</td>
+                                    <td class="px-6 py-4 text-center font-outfit text-neon-blue font-bold">{{ s['comment_count'] }}개</td>
+                                    <td class="px-6 py-4 text-xs text-slate-400 font-medium">{{ s['created_at'] }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button onclick="adminDeleteSong('{{ s['youtube_id'] }}', '{{ s['title']|replace('\'', '\\\'')|replace('\"', '\\\"') }}')"
+                                                class="text-xs font-semibold px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all text-red-400">
+                                            콘텐츠 강제 삭제
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 패널 3: 댓글 관리 (숨김) -->
+        <div id="admin-panel-comments" class="space-y-4 hidden">
+            <h3 class="font-outfit font-extrabold text-xl tracking-wide flex items-center gap-2 mb-2">
+                <i data-lucide="message-square" class="text-red-500 w-5 h-5"></i>
+                부적절 의견(댓글) 전체 모니터링
+            </h3>
+
+            <div class="glassmorphism rounded-3xl overflow-hidden border border-white/5">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-obsidian-card/90 border-b border-white/5 text-slate-400 font-bold text-xs uppercase tracking-wider">
+                                <th class="px-6 py-4">ID</th>
+                                <th class="px-6 py-4">작성자</th>
+                                <th class="px-6 py-4">해당 음악 제목</th>
+                                <th class="px-6 py-4">댓글 내용</th>
+                                <th class="px-6 py-4">작성 시각</th>
+                                <th class="px-6 py-4 text-right">모니터 제어</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for c in comments %}
+                                <tr id="admin-comment-row-{{ c['id'] }}" class="hover:bg-white/[0.02] transition-colors">
+                                    <td class="px-6 py-4 font-outfit text-slate-400 font-medium">{{ c['id'] }}</td>
+                                    <td class="px-6 py-4 font-bold text-slate-200">{{ c['username'] }}</td>
+                                    <td class="px-6 py-4 font-medium text-slate-400 text-xs">
+                                        <div class="line-clamp-1 max-w-[150px]">
+                                            {{ c['song_title'] }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-white font-normal break-all">
+                                        <div class="line-clamp-2 pr-4 text-xs sm:text-sm">
+                                            {{ c['content'] }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-xs text-slate-500 font-medium">{{ c['created_at'] }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button onclick="adminDeleteComment({{ c['id'] }})"
+                                                class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all text-red-400">
+                                            강제 삭제
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 관리 대시보드 탭 메뉴 전환 제어 스크립트
+    function switchAdminTab(tabName) {
+        const panels = ['users', 'songs', 'comments'];
+        
+        panels.forEach(p => {
+            const btn = document.getElementById(`admin-tab-btn-${p}`);
+            const panel = document.getElementById(`admin-panel-${p}`);
+            
+            if (p === tabName) {
+                // 활성화 스타일 적용 (붉은색 네온)
+                btn.className = "flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-white bg-red-500/90 shadow-lg";
+                panel.classList.remove('hidden');
+            } else {
+                // 비활성화 스타일
+                btn.className = "flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-slate-400 hover:text-white hover:bg-white/5";
+                panel.classList.add('hidden');
+            }
+        });
+    }
+
+    // 1. 회원 등급 (관리자 <-> 유저) 전환 API 호출
+    function adminToggleRole(userId) {
+        fetch(`/api/admin/users/${userId}/toggle-role`, { method: 'POST' })
+            .then(res => res.json().then(data => ({ status: res.status, data })))
+            .then(resObj => {
+                if (resObj.status === 200) {
+                    showToast(resObj.data.message, 'success');
+                    // 뱃지 내용 및 스타일 실시간 전환
+                    const badge = document.getElementById(`role-badge-${userId}`);
+                    if (resObj.data.new_role === 'admin') {
+                        badge.textContent = '관리자(ADMIN)';
+                        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400';
+                    } else {
+                        badge.textContent = '일반회원(USER)';
+                        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/10 border border-slate-500/20 text-slate-400';
+                    }
+                } else {
+                    showToast(resObj.data.message || '역할을 수정할 수 없습니다.', 'error');
+                }
+            })
+            .catch(() => showToast('네트워크 오류가 발생했습니다.', 'error'));
+    }
+
+    // 2. 회원 강제 삭제(탈퇴) API 호출
+    function adminDeleteUser(userId, username) {
+        if (!confirm(`[위험] 회원 '${username}'을 강제로 회원 탈퇴 처리하고 관련 작성 데이터를 모두 소거합니까?`)) return;
+        
+        fetch(`/api/admin/users/${userId}/delete`, { method: 'POST' })
+            .then(res => res.json().then(data => ({ status: res.status, data })))
+            .then(resObj => {
+                if (resObj.status === 200) {
+                    showToast(resObj.data.message, 'success');
+                    // 해당 행 로우 실시간 페이드아웃 후 제거
+                    const row = document.getElementById(`admin-user-row-${userId}`);
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+                    setTimeout(() => row.remove(), 500);
+                } else {
+                    showToast(resObj.data.message || '회원 탈퇴에 실패했습니다.', 'error');
+                }
+            })
+            .catch(() => showToast('네트워크 오류가 발생했습니다.', 'error'));
+    }
+
+    // 3. 음악 등록 게시글 강제 소거 삭제
+    function adminDeleteSong(youtubeId, songTitle) {
+        if (!confirm(`[경고] 음악 '${songTitle}' 및 이 곡에 엮인 모든 회원들의 댓글, 좋아요, 해시태그 데이터를 강제 폭파 삭제하시겠습니까?`)) return;
+        
+        fetch(`/api/admin/songs/${youtubeId}/delete`, { method: 'POST' })
+            .then(res => res.json().then(data => ({ status: res.status, data })))
+            .then(resObj => {
+                if (resObj.status === 200) {
+                    showToast(resObj.data.message, 'success');
+                    const row = document.getElementById(`admin-song-row-${youtubeId}`);
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+                    setTimeout(() => row.remove(), 500);
+                } else {
+                    showToast(resObj.data.message || '음악 삭제에 실패했습니다.', 'error');
+                }
+            })
+            .catch(() => showToast('네트워크 오류가 발생했습니다.', 'error'));
+    }
+
+    // 4. 부적절 댓글 강제 삭제
+    function adminDeleteComment(commentId) {
+        if (!confirm('부적절한 댓글로 분류되어 즉시 해당 의견을 폭파 삭제 처리합니까?')) return;
+        
+        fetch(`/api/admin/comments/${commentId}/delete`, { method: 'POST' })
+            .then(res => res.json().then(data => ({ status: res.status, data })))
+            .then(resObj => {
+                if (resObj.status === 200) {
+                    showToast(resObj.data.message, 'success');
+                    const row = document.getElementById(`admin-comment-row-${commentId}`);
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+                    setTimeout(() => row.remove(), 500);
+                } else {
+                    showToast(resObj.data.message || '댓글 삭제에 실패했습니다.', 'error');
+                }
+            })
+            .catch(() => showToast('네트워크 오류가 발생했습니다.', 'error'));
+    }
+</script>
+{% endblock %}

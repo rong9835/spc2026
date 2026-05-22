@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %}BeatSpace - {{ session.get('username') }}님의 마이 프로필{% endblock %}
+
+{% block content %}
+<!-- 상단 프로필 헤더 카드 -->
+<div class="glassmorphism rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden mb-8">
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-neon-purple/10 rounded-full blur-[100px] pointer-events-none"></div>
+    
+    <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+        <!-- 커스텀 아바타 이미지 영역 -->
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-neon-purple via-neon-pink to-neon-blue flex items-center justify-center text-white shadow-neon-glow shrink-0">
+            <i data-lucide="user" class="w-10 h-10 stroke-[1.5]"></i>
+        </div>
+        
+        <!-- 회원정보 -->
+        <div class="text-center sm:text-left flex-grow">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start gap-2.5">
+                <h2 class="font-outfit font-extrabold text-2xl tracking-wide text-white">{{ session.get('username') }}</h2>
+                <div class="flex justify-center items-center gap-2">
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full 
+                        {% if session.get('role') == 'admin' %}
+                            bg-red-500/10 border border-red-500/20 text-red-400
+                        {% else %}
+                            bg-purple-500/10 border border-purple-500/20 text-neon-purple
+                        {% endif %}">
+                        {{ '최고관리자' if session.get('role') == 'admin' else '일반회원' }}
+                    </span>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-2 font-medium">BeatSpace의 소중한 파트너 멤버입니다.</p>
+        </div>
+
+        <!-- 심플 활동 카운터 통계 -->
+        <div class="grid grid-cols-2 gap-4 shrink-0 w-full sm:w-auto">
+            <div class="bg-white/5 border border-white/5 px-6 py-3 rounded-2xl text-center">
+                <span class="block text-xs text-slate-400 font-semibold mb-1">작성한 댓글</span>
+                <span class="font-outfit font-extrabold text-lg text-neon-purple">{{ comments|length }}개</span>
+            </div>
+            <div class="bg-white/5 border border-white/5 px-6 py-3 rounded-2xl text-center">
+                <span class="block text-xs text-slate-400 font-semibold mb-1">좋아한 음악</span>
+                <span class="font-outfit font-extrabold text-lg text-neon-pink">{{ likes|length }}개</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 프로필 탭 세션 메뉴 -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+    <!-- 좌측 세션 메뉴 탭 (1칸) -->
+    <div class="lg:col-span-1 glassmorphism rounded-3xl p-4 border border-white/5">
+        <div class="flex flex-row lg:flex-col gap-1 w-full overflow-x-auto lg:overflow-visible">
+            <button onclick="switchProfileTab('comments')" id="tab-btn-comments" 
+                class="flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-white bg-neon-purple shadow-neon-glow">
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+                <span>나의 댓글 목록</span>
+            </button>
+            <button onclick="switchProfileTab('likes')" id="tab-btn-likes" 
+                class="flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-slate-400 hover:text-white hover:bg-white/5">
+                <i data-lucide="heart" class="w-4 h-4"></i>
+                <span>좋아한 음악 피드</span>
+            </button>
+            <button onclick="switchProfileTab('notifications')" id="tab-btn-notifications" 
+                class="flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-slate-400 hover:text-white hover:bg-white/5">
+                <i data-lucide="bell" class="w-4 h-4"></i>
+                <span>알림 모아보기</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 우측 각 탭별 컨텐츠 바디 (3칸) -->
+    <div class="lg:col-span-3 space-y-6">
+        
+        <!-- 탭 1: 나의 댓글 목록 -->
+        <div id="tab-panel-comments" class="space-y-4">
+            <h3 class="font-outfit font-extrabold text-xl tracking-wide flex items-center gap-2 mb-2">
+                <i data-lucide="message-square" class="text-neon-purple w-5 h-5"></i>
+                내가 작성한 댓글 목록
+            </h3>
+            
+            {% if comments %}
+                <div class="space-y-4">
+                    {% for comment in comments %}
+                        <div class="glassmorphism-card rounded-2xl p-5 flex gap-4 items-start relative group">
+                            <!-- 대상 곡 썸네일 -->
+                            <div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 hidden sm:block relative bg-obsidian">
+                                <img src="{{ comment['thumbnail_url'] }}" alt="{{ comment['song_title'] }}" class="w-full h-full object-cover">
+                            </div>
+                            
+                            <!-- 댓글 텍스트 내용 -->
+                            <div class="flex-grow min-w-0">
+                                <div class="flex justify-between items-start gap-4">
+                                    <a href="{{ url_for('song_detail', youtube_id=comment['youtube_id']) }}" 
+                                       class="font-bold text-sm text-slate-300 hover:text-neon-purple transition-all line-clamp-1">
+                                        {{ comment['song_title'] }}
+                                    </a>
+                                    <span class="text-[10px] text-slate-500 shrink-0 font-medium">{{ comment['created_at'] }}</span>
+                                </div>
+                                <p class="text-white text-sm mt-2 font-normal leading-relaxed break-all">
+                                    {{ comment['content'] }}
+                                </p>
+                            </div>
+                            
+                            <!-- 우측 곡 상세보기 바로가기 링크 버튼 -->
+                            <a href="{{ url_for('song_detail', youtube_id=comment['youtube_id']) }}" 
+                               class="absolute right-4 bottom-4 p-2 bg-white/5 hover:bg-neon-purple hover:text-white rounded-xl text-slate-400 transition-all opacity-0 group-hover:opacity-100 hidden sm:block"
+                               title="음악 상세 및 댓글 교환 공간으로 이동">
+                                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="glassmorphism rounded-2xl py-12 text-center border border-white/5">
+                    <i data-lucide="message-square" class="w-10 h-10 text-slate-600 mx-auto mb-3"></i>
+                    <p class="text-xs text-slate-500">아직 등록한 댓글 의견이 없습니다. 피드에서 다른 곡에 댓글을 남겨보세요!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 탭 2: 내가 좋아한 음악 목록 (숨김) -->
+        <div id="tab-panel-likes" class="space-y-4 hidden">
+            <h3 class="font-outfit font-extrabold text-xl tracking-wide flex items-center gap-2 mb-2">
+                <i data-lucide="heart" class="text-neon-pink w-5 h-5"></i>
+                내가 좋아요 표시한 음악 피드
+            </h3>
+
+            {% if likes %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for song in likes %}
+                        <div class="glassmorphism-card rounded-2xl overflow-hidden flex flex-col group relative" data-youtube-id="{{ song['youtube_id'] }}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-95 pointer-events-none"></div>
+                            
+                            <!-- 썸네일 -->
+                            <div class="relative h-40 overflow-hidden shrink-0">
+                                <img src="{{ song['thumbnail_url'] }}" alt="{{ song['title'] }}" class="w-full h-full object-cover">
+                                <a href="{{ url_for('song_detail', youtube_id=song['youtube_id']) }}" 
+                                   class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <span class="p-3 bg-neon-pink rounded-full text-white shadow-pink-glow">
+                                        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                                    </span>
+                                </a>
+                            </div>
+
+                            <!-- 본문 텍스트 -->
+                            <div class="p-5 flex-grow flex flex-col justify-between relative z-20">
+                                <a href="{{ url_for('song_detail', youtube_id=song['youtube_id']) }}" 
+                                   class="font-semibold text-base text-white hover:text-neon-pink line-clamp-1 block mb-2 transition-colors">
+                                    {{ song['title'] }}
+                                </a>
+                                
+                                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-xs">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex items-center gap-1 text-neon-pink font-semibold">
+                                            <i data-lucide="heart" class="w-4 h-4 fill-current"></i>
+                                            <span>{{ song['like_count'] }}</span>
+                                        </span>
+                                        <span class="flex items-center gap-1 text-slate-400 font-semibold">
+                                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                                            <span>{{ song['comment_count'] }}</span>
+                                        </span>
+                                    </div>
+                                    <button onclick="unlikeProfileTrack('{{ song['youtube_id'] }}')" 
+                                            class="text-[10px] bg-red-500/10 hover:bg-red-500 hover:text-white px-2 py-1 border border-red-500/20 hover:border-transparent rounded-lg text-red-400 font-semibold transition-all">
+                                        좋아요 취소
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="glassmorphism rounded-2xl py-12 text-center border border-white/5">
+                    <i data-lucide="heart" class="w-10 h-10 text-slate-600 mx-auto mb-3"></i>
+                    <p class="text-xs text-slate-500">좋아요를 누른 음악이 없습니다. 마음에 드는 곡에 하트를 꾹 눌러보세요!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 탭 3: 알림 히스토리 모아보기 (숨김) -->
+        <div id="tab-panel-notifications" class="space-y-4 hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-outfit font-extrabold text-xl tracking-wide flex items-center gap-2">
+                    <i data-lucide="bell" class="text-neon-purple w-5 h-5"></i>
+                    푸시 알림 목록 히스토리
+                </h3>
+                {% if notifications %}
+                    <button onclick="markAllNotificationsAsRead()" class="text-xs text-slate-400 hover:text-neon-purple transition-all font-semibold flex items-center gap-1">
+                        <i data-lucide="check-check" class="w-3.5 h-3.5"></i> 모두 읽음 처리
+                    </button>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+                <div class="space-y-3">
+                    {% for n in notifications %}
+                        <div class="glassmorphism-card rounded-2xl p-5 flex gap-4 items-center relative border transition-all duration-300
+                            {% if n['is_read'] == 0 %}
+                                border-neon-purple/20 bg-neon-purple/5 shadow-neon-glow
+                            {% else %}
+                                border-white/5 opacity-80
+                            {% endif %}">
+                            
+                            <!-- 알림 상태 아이콘 -->
+                            <div class="p-2.5 rounded-xl shrink-0 
+                                {% if n['is_read'] == 0 %}
+                                    bg-neon-purple/20 text-neon-purple
+                                {% else %}
+                                    bg-white/5 text-slate-500
+                                {% endif %}">
+                                <i data-lucide="message-square" class="w-5 h-5"></i>
+                            </div>
+
+                            <!-- 알림 메시지 본문 -->
+                            <div class="flex-grow min-w-0 pr-10">
+                                <div class="text-sm text-slate-200">
+                                    <strong class="text-neon-purple font-bold">{{ n['sender_name'] }}</strong>님이 회원님이 좋아요 한 음악 <a href="{{ url_for('song_detail', youtube_id=n['youtube_id']) }}" class="text-neon-pink hover:underline font-bold">[{{ n['song_title'] }}]</a>에 댓글을 남겼습니다:
+                                </div>
+                                <p class="text-xs italic text-slate-400 mt-1.5 bg-black/20 p-2 rounded-lg border border-white/5 line-clamp-1 font-normal break-all">
+                                    "{{ n['comment_content'] }}"
+                                </p>
+                            </div>
+
+                            <!-- 읽지 않은 상태 시각 표시 구체 배지 -->
+                            {% if n['is_read'] == 0 %}
+                                <div class="absolute right-5 top-1/2 -translate-y-1/2 flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-purple opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-neon-purple"></span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="glassmorphism rounded-2xl py-12 text-center border border-white/5">
+                    <i data-lucide="bell-off" class="w-10 h-10 text-slate-600 mx-auto mb-3"></i>
+                    <p class="text-xs text-slate-500">도착한 알림 내역이 없습니다.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 프로필 메뉴 탭 전환 제어 스크립트
+    function switchProfileTab(tabName) {
+        const panels = ['comments', 'likes', 'notifications'];
+        
+        panels.forEach(p => {
+            const btn = document.getElementById(`tab-btn-${p}`);
+            const panel = document.getElementById(`tab-panel-${p}`);
+            
+            if (p === tabName) {
+                // 탭 버튼 활성화 스타일
+                btn.className = "flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-white bg-neon-purple shadow-neon-glow";
+                // 패널 보임
+                panel.classList.remove('hidden');
+            } else {
+                // 탭 버튼 비활성화 스타일
+                btn.className = "flex-1 lg:flex-initial flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus:outline-none shrink-0 text-slate-400 hover:text-white hover:bg-white/5";
+                // 패널 숨김
+                panel.classList.add('hidden');
+            }
+        });
+    }
+
+    // 마이프로필 전용: 좋아요 목록에서 직접 좋아요 취소 처리
+    function unlikeProfileTrack(youtubeId) {
+        if (!confirm('해당 음악의 좋아요를 해제하시겠습니까?')) return;
+        
+        fetch(`/api/songs/${youtubeId}/like`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('좋아요를 해제했습니다.', 'info');
+                    // 1초 후 리로드해서 변경사항 갱신
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                }
+            })
+            .catch(err => {
+                showToast('네트워크 오류가 발생했습니다.', 'error');
+            });
+    }
+
+    // 프로필에서 모든 알림 일괄 읽음 처리
+    function markAllNotificationsAsRead() {
+        fetch('/api/notifications/mark-read', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('모든 알림을 읽음 처리했습니다.', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                }
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}BeatSpace - 로그인 및 회원가입{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center py-10 md:py-16">
+    <!-- 글래스모피즘 인증 박스 -->
+    <div class="w-full max-w-md glassmorphism rounded-3xl overflow-hidden shadow-2xl p-8 sm:p-10 border border-white/10 relative">
+        
+        <!-- 디자인 포인트 원형 그라데이션 -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-neon-purple/20 rounded-full blur-2xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-neon-pink/20 rounded-full blur-2xl"></div>
+        
+        <!-- 상단 탭 컨트롤 (로그인 vs 회원가입) -->
+        <div class="flex border-b border-white/10 mb-8 relative">
+            <button id="login-tab-btn" class="flex-1 pb-4 text-lg font-bold text-center tracking-wide text-white relative focus:outline-none transition-all duration-300">
+                로그인
+                <span id="login-tab-line" class="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-neon-purple to-neon-pink rounded-full transition-all duration-300"></span>
+            </button>
+            <button id="register-tab-btn" class="flex-1 pb-4 text-lg font-bold text-center tracking-wide text-slate-400 hover:text-slate-200 relative focus:outline-none transition-all duration-300">
+                회원가입
+                <span id="register-tab-line" class="absolute bottom-0 left-0 w-full h-0 bg-gradient-to-r from-neon-purple to-neon-pink rounded-full transition-all duration-300"></span>
+            </button>
+        </div>
+
+        <!-- 에러/성공 메시지 알림 박스 (동적 노출) -->
+        <div id="auth-alert" class="hidden mb-6 p-4 rounded-xl text-sm border flex items-start gap-2.5 transition-all">
+            <i id="auth-alert-icon" data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+            <span id="auth-alert-msg" class="font-medium">알림 메시지</span>
+        </div>
+
+        <!-- 1. 로그인 폼 -->
+        <form id="login-form" class="space-y-6">
+            <div class="space-y-2">
+                <label for="login-username" class="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="user" class="w-4 h-4 text-neon-purple"></i>
+                    아이디
+                </label>
+                <input type="text" id="login-username" name="username" required autocomplete="username"
+                    class="w-full bg-obsidian-card/70 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all"
+                    placeholder="아이디를 입력해 주세요.">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="login-password" class="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="lock" class="w-4 h-4 text-neon-pink"></i>
+                    비밀번호
+                </label>
+                <input type="password" id="login-password" name="password" required autocomplete="current-password"
+                    class="w-full bg-obsidian-card/70 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-all"
+                    placeholder="비밀번호를 입력해 주세요.">
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-gradient-to-r from-neon-purple to-neon-pink hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3.5 rounded-xl shadow-neon-glow hover:shadow-pink-glow transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 mt-8">
+                <i data-lucide="log-in" class="w-5 h-5"></i>
+                <span>들어가기</span>
+            </button>
+        </form>
+
+        <!-- 2. 회원가입 폼 (초기 숨김) -->
+        <form id="register-form" class="space-y-6 hidden">
+            <div class="space-y-2">
+                <label for="register-username" class="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="user-plus" class="w-4 h-4 text-neon-purple"></i>
+                    희망 아이디
+                </label>
+                <input type="text" id="register-username" name="username" required minlength="3" autocomplete="username"
+                    class="w-full bg-obsidian-card/70 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all"
+                    placeholder="3자 이상의 아이디를 생성해 주세요.">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="register-password" class="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="lock" class="w-4 h-4 text-neon-pink"></i>
+                    비밀번호 설정
+                </label>
+                <input type="password" id="register-password" name="password" required autocomplete="new-password"
+                    class="w-full bg-obsidian-card/70 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-all"
+                    placeholder="안전한 비밀번호를 작성해 주세요.">
+            </div>
+
+            <div class="space-y-2">
+                <label for="register-password-confirm" class="text-sm font-semibold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="check-square" class="w-4 h-4 text-neon-blue"></i>
+                    비밀번호 확인
+                </label>
+                <input type="password" id="register-password-confirm" name="password_confirm" required autocomplete="new-password"
+                    class="w-full bg-obsidian-card/70 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue transition-all"
+                    placeholder="비밀번호를 한번 더 입력해 주세요.">
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-gradient-to-r from-neon-blue to-neon-purple hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-neon-glow transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 mt-8">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
+                <span>가입 완료하기</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginTabBtn = document.getElementById('login-tab-btn');
+        const registerTabBtn = document.getElementById('register-tab-btn');
+        const loginTabLine = document.getElementById('login-tab-line');
+        const registerTabLine = document.getElementById('register-tab-line');
+        
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        const alertBox = document.getElementById('auth-alert');
+        const alertIcon = document.getElementById('auth-alert-icon');
+        const alertMsg = document.getElementById('auth-alert-msg');
+
+        function showAlert(message, type = 'error') {
+            alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                alertIcon.setAttribute('data-lucide', 'alert-circle');
+            } else {
+                alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                alertIcon.setAttribute('data-lucide', 'check-circle');
+            }
+            
+            alertMsg.textContent = message;
+            lucide.createIcons();
+        }
+
+        // 로그인 탭 선택
+        loginTabBtn.addEventListener('click', function() {
+            loginTabBtn.classList.remove('text-slate-400');
+            loginTabBtn.classList.add('text-white');
+            registerTabBtn.classList.remove('text-white');
+            registerTabBtn.classList.add('text-slate-400');
+            
+            loginTabLine.classList.remove('h-0');
+            loginTabLine.classList.add('h-[3px]');
+            registerTabLine.classList.remove('h-[3px]');
+            registerTabLine.classList.add('h-0');
+            
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            alertBox.classList.add('hidden');
+        });
+
+        // 회원가입 탭 선택
+        registerTabBtn.addEventListener('click', function() {
+            registerTabBtn.classList.remove('text-slate-400');
+            registerTabBtn.classList.add('text-white');
+            loginTabBtn.classList.remove('text-white');
+            loginTabBtn.classList.add('text-slate-400');
+            
+            registerTabLine.classList.remove('h-0');
+            registerTabLine.classList.add('h-[3px]');
+            loginTabLine.classList.remove('h-[3px]');
+            loginTabLine.classList.add('h-0');
+            
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            alertBox.classList.add('hidden');
+        });
+
+        // 1. 로그인 서브밋 처리
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, data })))
+            .then(resObj => {
+                if (resObj.status === 200) {
+                    showAlert(resObj.data.message, 'success');
+                    // 1초 뒤 메인 피드로 이동
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    showAlert(resObj.data.message || '로그인에 실패했습니다.');
+                }
+            })
+            .catch(err => {
+                showAlert('서버와의 통신 중 오류가 발생했습니다.');
+            });
+        });
+
+        // 2. 회원가입 서브밋 처리
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+            if (password !== passwordConfirm) {
+                showAlert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+                return;
+            }
+
+            fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, data })))
+            .then(resObj => {
+                if (resObj.status === 200) {
+                    showAlert(resObj.data.message, 'success');
+                    // 가입 성공 시 로그인 탭으로 자동으로 전환
+                    setTimeout(() => {
+                        loginTabBtn.click();
+                        document.getElementById('login-username').value = username;
+                        document.getElementById('login-password').focus();
+                    }, 1500);
+                } else {
+                    showAlert(resObj.data.message || '회원가입에 실패했습니다.');
+                }
+            })
+            .catch(err => {
+                showAlert('서버와의 통신 중 오류가 발생했습니다.');
+            });
+        });
+    });
+</script>
+{% endblock %}

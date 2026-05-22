@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}BeatSpace - {{ song['title'] }}{% endblock %}
+
+{% block content %}
+<!-- 상단 헤더: 뒤로가기 -->
+<div class="mb-6">
+    <a href="{{ url_for('index') }}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white hover:neon-text-glow transition-all">
+        <i data-lucide="arrow-left" class="w-4 h-4 text-neon-purple"></i>
+        <span>메인 피드로 돌아가기</span>
+    </a>
+</div>
+
+<!-- 상세 페이지 레이아웃 -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- 좌측 영역: 유튜브 플레이어 & 노래 정보 (2칸 차지) -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- 유튜브 동영상 플레이어 컨테이너 (Premium Player Frame) -->
+        <div class="glassmorphism rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
+            <div class="aspect-video w-full">
+                <iframe 
+                    class="w-full h-full"
+                    src="https://www.youtube.com/embed/{{ song['youtube_id'] }}?enablejsapi=1&autoplay=1&modestbranding=1" 
+                    title="{{ song['title'] }}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+            
+            <!-- 플레이어 하단 메인 정보 바 -->
+            <div class="p-6 bg-obsidian-card/40 border-t border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="font-outfit font-extrabold text-xl sm:text-2xl text-white tracking-wide leading-snug">
+                        {{ song['title'] }}
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                        <span>등록일: {{ song['created_at'] }}</span>
+                        <span>•</span>
+                        <span class="text-neon-pink flex items-center gap-0.5">
+                            <i data-lucide="youtube" class="w-3.5 h-3.5"></i>
+                            {{ song['youtube_id'] }}
+                        </span>
+                    </p>
+                </div>
+
+                <!-- 큰 좋아요 토글 버튼 (Dynamic Interaction) -->
+                <button id="song-like-btn" onclick="toggleDetailLike('{{ song['youtube_id'] }}')" 
+                    class="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all duration-300 shadow-sm shrink-0 border focus:outline-none transform active:scale-95
+                    {% if is_liked %}
+                        bg-neon-pink/10 border-neon-pink/30 text-neon-pink hover:bg-neon-pink/20 shadow-pink-glow
+                    {% else %}
+                        bg-white/5 border-white/10 text-slate-300 hover:border-neon-pink/30 hover:text-neon-pink
+                    {% endif %}">
+                    <i id="like-icon" data-lucide="heart" class="w-5 h-5 {% if is_liked %}fill-current{% endif %}"></i>
+                    <span id="detail-like-text">좋아요</span>
+                    <span id="detail-like-count" class="px-2 py-0.5 rounded-lg bg-black/40 text-xs">{{ like_count }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 곡 설명 & 상세 정보 소개 패널 -->
+        <div class="glassmorphism rounded-3xl p-6 sm:p-8 border border-white/5 relative">
+            <h3 class="font-outfit font-bold text-base text-slate-300 tracking-wider mb-4 flex items-center gap-2">
+                <i data-lucide="info" class="w-5 h-5 text-neon-purple"></i>
+                음악 상세 소개
+            </h3>
+            <p class="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-normal">
+                {{ song['description'] or '등록된 아티스트 설명이 없습니다.' }}
+            </p>
+        </div>
+    </div>
+
+    <!-- 우측 영역: 해시태그 관리 & 실시간 댓글 의견 교환 SNS (1칸 차지) -->
+    <div class="lg:col-span-1 space-y-6">
+        
+        <!-- 해시태그 스페이스 -->
+        <div class="glassmorphism rounded-3xl p-6 border border-white/5">
+            <h3 class="font-outfit font-bold text-sm text-slate-300 tracking-wider mb-4 flex items-center gap-2">
+                <i data-lucide="tag" class="w-4 h-4 text-neon-purple stroke-[2.5]"></i>
+                음악 해시태그
+            </h3>
+
+            <!-- 동적으로 늘어나는 태그 클라우드 리스트 -->
+            <div id="detail-tag-list" class="flex flex-wrap gap-2 mb-4">
+                {% if hashtags %}
+                    {% for h in hashtags %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-obsidian-card border border-white/5 text-xs text-slate-300 hover:border-neon-purple/20 transition-all font-semibold" 
+                              data-tag-name="{{ h['tag'] }}">
+                            <span>#{{ h['tag'] }}</span>
+                            {% if session.get('role') == 'admin' or h['user_id'] == session.get('user_id') %}
+                                <button onclick="deleteHashtag('{{ song['youtube_id'] }}', '{{ h['tag'] }}')" 
+                                        class="text-slate-500 hover:text-red-400 p-0.5 rounded-full hover:bg-white/5 transition-all"
+                                        title="태그 삭제">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <p id="no-tags-msg" class="text-xs text-slate-500 py-2">등록된 해시태그가 없습니다. 자유롭게 등록해 보세요!</p>
+                {% endif %}
+            </div>
+
+            <!-- 해시태그 입력 상자 -->
+            {% if session.get('user_id') %}
+                <div class="flex gap-2">
+                    <input type="text" id="hashtag-input" 
+                           class="flex-grow bg-obsidian-card/75 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all"
+                           placeholder="해시태그 입력 (예: healing)...">
+                    <button id="add-hashtag-btn" onclick="addHashtag('{{ song['youtube_id'] }}')"
+                            class="bg-neon-purple hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-neon-glow transition-all">
+                        추가
+                    </button>
+                </div>
+            {% else %}
+                <p class="text-xs text-slate-500 text-center border border-dashed border-white/5 py-3 rounded-xl bg-white/5">
+                    로그인하면 해시태그를 추가할 수 있습니다.
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- 실시간 댓글 SNS 토크 게시판 -->
+        <div id="comments-section" class="glassmorphism rounded-3xl p-6 border border-white/5 flex flex-col max-h-[600px]">
+            <h3 class="font-outfit font-bold text-sm text-slate-300 tracking-wider mb-4 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4 text-neon-pink"></i>
+                    <span>의견 나누기 (SNS)</span>
+                </div>
+                <span id="comment-total-badge" class="px-2 py-0.5 rounded-md bg-pink-500/10 text-neon-pink font-bold text-xs">
+                    {{ comments|length }}개
+                </span>
+            </h3>
+
+            <!-- 댓글 리스트 스크롤 영역 -->
+            <div id="comments-container" class="flex-grow overflow-y-auto divide-y divide-white/5 space-y-4 pr-1 mb-4 min-h-[250px] max-h-[350px]">
+                {% if comments %}
+                    {% for c in comments %}
+                        <div class="py-3 flex flex-col gap-1.5 text-sm animate-fade-in group">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-1.5 font-bold">
+                                    <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <span class="text-white">{{ c['username'] }}</span>
+                                    
+                                    {% if c['role'] == 'admin' %}
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-extrabold tracking-wider">ADMIN</span>
+                                    {% endif %}
+                                </div>
+                                <span class="text-[10px] text-slate-500">{{ c['created_at'] }}</span>
+                            </div>
+                            <p class="text-slate-300 font-normal leading-relaxed break-all pr-2">
+                                {{ c['content'] }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div id="no-comments-msg" class="py-12 text-center text-xs text-slate-500">
+                        아직 나눈 의견이 없습니다. 최초의 평론을 남겨보세요!
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- 댓글 인풋 영역 -->
+            <div class="shrink-0 pt-3 border-t border-white/5">
+                {% if session.get('user_id') %}
+                    <div class="space-y-3">
+                        <textarea id="comment-textarea" rows="3"
+                                  class="w-full bg-obsidian-card/75 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-all resize-none"
+                                  placeholder="음악에 대해 자유롭고 매너 있는 의견을 남겨 소통해 보세요!"></textarea>
+                        <button id="post-comment-btn" onclick="postComment('{{ song['youtube_id'] }}')"
+                                class="w-full bg-gradient-to-r from-neon-pink to-neon-purple hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl text-sm shadow-pink-glow hover:shadow-neon-glow transition-all transform active:scale-95 flex items-center justify-center gap-1.5">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span>댓글 남기기</span>
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 bg-obsidian-card/50 rounded-2xl border border-dashed border-white/5">
+                        <p class="text-xs text-slate-400 mb-3">로그인 후 댓글 작성과 의견 소통이 가능합니다.</p>
+                        <a href="{{ url_for('auth_page') }}" class="inline-flex items-center gap-1 bg-gradient-to-r from-neon-purple to-neon-pink text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md">
+                            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                            <span>로그인 하러가기</span>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

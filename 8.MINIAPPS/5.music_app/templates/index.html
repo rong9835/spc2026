@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}BeatSpace - 음악 피드 & 검색 SNS{% endblock %}
+
+{% block content %}
+<!-- Hero 타이틀 영역 (Premium Aesthetics) -->
+<div class="text-center py-12 md:py-16 relative overflow-hidden">
+    <div class="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none select-none">
+        <span class="font-outfit font-extrabold text-[15vw] text-slate-800/10 tracking-tighter uppercase">BEATSPACE</span>
+    </div>
+    <h1 class="font-outfit font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent leading-none">
+        Discover & Chat About Music
+    </h1>
+    <p class="mt-4 text-slate-400 text-base sm:text-lg max-w-2xl mx-auto font-medium">
+        유튜브의 실제 노래를 검색하여 커뮤니티에 등록하고,<br class="hidden sm:inline" />
+        다른 음악 애호가들과 실시간으로 감상 평과 해시태그를 나누는 음악 전용 SNS 공간입니다.
+    </p>
+</div>
+
+<!-- 듀얼 검색 패널 (로컬 검색 & 유튜브 검색) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+    <!-- 1 & 2. 로컬 데이터베이스 검색 (좌측 2칸 차지) -->
+    <div class="lg:col-span-2 glassmorphism rounded-3xl p-6 sm:p-8 border border-white/5 relative">
+        <div class="flex items-center gap-2 mb-4">
+            <div class="p-2 bg-neon-purple/10 rounded-xl">
+                <i data-lucide="search" class="w-5 h-5 text-neon-purple"></i>
+            </div>
+            <h2 class="font-outfit font-bold text-lg tracking-wide">커뮤니티 음악 검색</h2>
+        </div>
+        <p class="text-xs text-slate-400 mb-6">등록된 음악들의 제목, 설명, 그리고 자유 해시태그(#kpop 등)를 통합 검색합니다.</p>
+        
+        <form action="{{ url_for('index') }}" method="GET" class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-grow">
+                <input type="text" name="q" value="{{ query }}"
+                    class="w-full bg-obsidian-card/75 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all"
+                    placeholder="노래 제목, 아티스트 설명 또는 #해시태그 검색...">
+                <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2"></i>
+            </div>
+            <button type="submit"
+                class="bg-gradient-to-r from-neon-purple to-neon-blue hover:from-purple-500 hover:to-blue-500 text-white font-semibold px-8 py-4 rounded-2xl shadow-neon-glow transition-all duration-300 transform hover:-translate-y-0.5">
+                검색하기
+            </button>
+        </form>
+
+        {% if query %}
+        <div class="mt-4 flex items-center justify-between text-sm text-slate-400">
+            <span>검색어: <strong class="text-neon-purple">"{{ query }}"</strong> 검색 결과</span>
+            <a href="{{ url_for('index') }}" class="text-xs text-slate-500 hover:text-white flex items-center gap-1">
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 필터 초기화
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 3. 실시간 유튜브 검색 등록기 (우측 1칸 차지) -->
+    <div class="glassmorphism rounded-3xl p-6 sm:p-8 border border-white/5 relative">
+        <div class="flex items-center gap-2 mb-4">
+            <div class="p-2 bg-neon-pink/10 rounded-xl">
+                <i data-lucide="youtube" class="w-5 h-5 text-neon-pink"></i>
+            </div>
+            <h2 class="font-outfit font-bold text-lg tracking-wide text-neon-pink">유튜브 실제노래 등록</h2>
+        </div>
+        <p class="text-xs text-slate-400 mb-6">검색창에 노래나 가수 이름을 적어 유튜브에서 실제 노래를 커뮤니티에 등록해 보세요!</p>
+        
+        <div class="flex gap-2">
+            <input type="text" id="yt-search-input"
+                class="flex-grow bg-obsidian-card/75 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neon-pink focus:ring-1 focus:ring-neon-pink transition-all"
+                placeholder="유튜브 노래 제목/가수 검색...">
+            <button id="yt-search-btn"
+                class="bg-neon-pink hover:bg-pink-500 text-white font-semibold px-4 py-3 rounded-xl shadow-pink-glow transition-all flex items-center justify-center shrink-0">
+                <i data-lucide="search" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 유튜브 검색 결과 동적 드롭다운 패널 -->
+<div id="yt-search-results-panel" class="hidden glassmorphism rounded-3xl p-6 border border-neon-pink/20 shadow-2xl mb-12 animate-fade-in relative">
+    <button id="close-yt-panel-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/5 transition-all">
+        <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <h3 class="font-outfit font-bold text-base text-neon-pink mb-4 flex items-center gap-2">
+        <i data-lucide="youtube" class="w-5 h-5"></i> YouTube 검색 결과
+    </h3>
+    <div id="yt-results-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2">
+        <!-- 유튜브 검색 결과 아이템들이 동적으로 여기에 빌드됩니다 -->
+    </div>
+</div>
+
+<!-- 메인 콘텐츠 영역: 핫 해시태그 & 노래 피드 목록 -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+    
+    <!-- 좌측 사이드바: 핫 해시태그 리스트 (1칸 차지) -->
+    <div class="lg:col-span-1 space-y-6">
+        <div class="glassmorphism rounded-3xl p-6 border border-white/5">
+            <h3 class="font-outfit font-bold text-sm text-slate-300 tracking-wider uppercase mb-4 flex items-center gap-2">
+                <i data-lucide="hash" class="w-4 h-4 text-neon-purple stroke-[2.5]"></i>
+                인기 해시태그
+            </h3>
+            
+            <div class="flex flex-wrap lg:flex-col gap-2">
+                {% if tags %}
+                    {% for t in tags %}
+                        <a href="{{ url_for('index', q='#' + t['tag']) }}" 
+                           class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-obsidian-card/65 border border-white/5 text-xs text-slate-300 hover:text-neon-purple hover:border-neon-purple/30 transition-all duration-300">
+                            <span class="font-medium truncate">#{{ t['tag'] }}</span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-purple-500/10 text-neon-purple font-bold shrink-0">{{ t['count'] }}개</span>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-xs text-slate-500 py-4">등록된 해시태그가 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 커뮤니티 가이드 카드 (Aesthetic Detail) -->
+        <div class="bg-gradient-to-br from-neon-purple/20 via-neon-pink/10 to-transparent rounded-3xl p-6 border border-white/5 shadow-neon-glow">
+            <h4 class="font-outfit font-bold text-sm text-white mb-2 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i>
+                BeatSpace 이용 꿀팁!
+            </h4>
+            <ul class="text-xs text-slate-400 space-y-2 list-disc list-inside">
+                <li>원하는 노래를 우측 유튜브 검색기로 찾아 등록하세요.</li>
+                <li>상세페이지에서 음악을 감상하고, 자유롭게 태그를 추가하세요.</li>
+                <li>내가 좋아요 누른 노래에 남들이 의견을 적으면 실시간 알람이 옵니다!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 우측 피드: 등록된 음악 목록 (3칸 차지) -->
+    <div class="lg:col-span-3 space-y-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-outfit font-extrabold text-2xl tracking-wide flex items-center gap-2">
+                <i data-lucide="disc" class="w-6 h-6 text-neon-purple animate-spin" style="animation-duration: 4s;"></i>
+                {% if query %}
+                    검색 결과 음악 목록
+                {% else %}
+                    음악 스페이스 피드
+                {% endif %}
+            </h3>
+            <span class="text-xs text-slate-400">총 {{ songs|length }}개의 음악</span>
+        </div>
+
+        {% if songs %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for song in songs %}
+                    <!-- 개별 음악 카드 -->
+                    <div class="glassmorphism-card rounded-2xl overflow-hidden flex flex-col group relative" data-youtube-id="{{ song['youtube_id'] }}">
+                        <!-- 카드 내 그라데이션 오버레이 -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-95 pointer-events-none"></div>
+
+                        <!-- 썸네일 & 재생 아이콘 호버 효과 -->
+                        <div class="relative h-48 overflow-hidden shrink-0">
+                            <img src="{{ song['thumbnail_url'] }}" alt="{{ song['title'] }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            
+                            <!-- 썸네일 위 비디오 재생 호버 버튼 -->
+                            <a href="{{ url_for('song_detail', youtube_id=song['youtube_id']) }}" 
+                               class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                                <span class="p-4 bg-neon-purple hover:bg-neon-pink rounded-full text-white shadow-neon-glow hover:shadow-pink-glow transition-all transform scale-90 group-hover:scale-100 duration-300">
+                                    <i data-lucide="play" class="w-7 h-7 fill-current"></i>
+                                </span>
+                            </a>
+                        </div>
+
+                        <!-- 음악 텍스트 본문 -->
+                        <div class="p-5 flex-grow flex flex-col justify-between relative z-20">
+                            <div>
+                                <a href="{{ url_for('song_detail', youtube_id=song['youtube_id']) }}" 
+                                   class="font-semibold text-lg text-white hover:text-neon-purple hover:neon-text-glow transition-all line-clamp-1 block mb-2">
+                                    {{ song['title'] }}
+                                </a>
+                                <p class="text-slate-400 text-xs line-clamp-2 mb-4 font-normal leading-relaxed">
+                                    {{ song['description'] }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- 해시태그 목록 -->
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% if song['tags'] %}
+                                        {% for t in song['tags'][:4] %}
+                                            <a href="{{ url_for('index', q='#' + t) }}" 
+                                               class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300 hover:text-neon-purple hover:border-neon-purple/20 transition-all">
+                                                #{{ t }}
+                                            </a>
+                                        {% endfor %}
+                                        {% if song['tags']|length > 4 %}
+                                            <span class="text-[10px] text-slate-500 font-bold px-1.5 py-0.5">+{{ song['tags']|length - 4 }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-[10px] text-slate-600 font-medium">#태그가 아직 없습니다</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- 좋아요 및 댓글수 (하단 메타 영역) -->
+                                <div class="flex items-center justify-between border-t border-white/5 pt-3 text-xs">
+                                    <div class="flex items-center gap-3">
+                                        <!-- 좋아요 버튼 (로그인 확인 후 토글) -->
+                                        <button onclick="toggleCardLike(event, '{{ song['youtube_id'] }}')" 
+                                                class="flex items-center gap-1 hover:text-neon-pink transition-colors font-semibold group/btn {% if song['is_liked'] %}text-neon-pink{% else %}text-slate-400{% endif %}"
+                                                title="좋아요">
+                                            <i data-lucide="heart" class="w-4 h-4 {% if song['is_liked'] %}fill-current{% endif %} group-hover/btn:scale-125 transition-transform"></i>
+                                            <span class="like-count">{{ song['like_count'] }}</span>
+                                        </button>
+
+                                        <!-- 댓글 이동 링크 -->
+                                        <a href="{{ url_for('song_detail', youtube_id=song['youtube_id']) }}#comments-section" 
+                                           class="flex items-center gap-1 text-slate-400 hover:text-neon-blue transition-colors font-semibold"
+                                           title="댓글">
+                                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                                            <span>{{ song['comment_count'] }}</span>
+                                        </a>
+                                    </div>
+                                    
+                                    <span class="text-[10px] text-slate-500 font-medium">
+                                        {{ song['created_at'].split(' ')[0] }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- 등록된 음악이 없을 때 메시지 -->
+            <div class="glassmorphism rounded-3xl p-12 text-center border border-white/5">
+                <i data-lucide="music-2" class="w-12 h-12 text-slate-600 mx-auto mb-4 animate-bounce"></i>
+                <h4 class="text-lg font-bold text-slate-400 mb-2">등록되어 있거나 일치하는 음악이 없습니다.</h4>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">
+                    검색어가 잘못되었거나 아직 음악이 추가되지 않았습니다. 우측의 유튜브 노래 검색기능을 사용해 최초의 음악을 추가해 보세요!
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
