@@ -39,11 +39,22 @@ def list():
 
 @app.route('/delete', methods=['POST'])
 def delete():
+    id = request.json.get('id')
+    sql = 'DELETE FROM board WHERE id= ?'
+    db.execute(sql, (id,))
+    db.commit()
     return jsonify({'result': 'success'})
 
 
 @app.route('/modify', methods=['POST'])
 def modify():
+    id = request.json.get('id')
+    title = request.json.get('title')
+    message = request.json.get('message')
+    sql = 'UPDATE board SET title = ?, message= ? WHERE id= ?'
+    db.execute(sql, (title, message, id))
+    db.commit()
+
     return jsonify({'result': 'success'})
 
 

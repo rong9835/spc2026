@@ -1,5 +1,4 @@
 document.getElementById('submitBtn').addEventListener('click', function () {
-  console.log('버튼눌림');
   let title = document.getElementById('input-title').value;
   let message = document.getElementById('input-text').value;
 
@@ -12,7 +11,8 @@ document.getElementById('submitBtn').addEventListener('click', function () {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log('서버 응답:', data);
+      document.getElementById('input-title').value = '';
+      document.getElementById('input-text').value = '';
       loadList();
     });
 });
@@ -20,9 +20,7 @@ document.getElementById('submitBtn').addEventListener('click', function () {
 function loadList() {
   fetch('/list')
     .then((response) => response.json())
-
     .then((data) => {
-      console.log(data);
       let cardList = document.getElementById('card-list');
       cardList.innerHTML = '';
 
@@ -31,11 +29,14 @@ function loadList() {
         let title = item[1];
         let message = item[2];
         let card = document.createElement('div');
+        card.id = `card-${id}`;
         card.innerHTML = `
         <div>
-          <h2>${id}<h2>
+          <h2>${id}</h2>
           <h3>${title}</h3>
           <p>${message}</p>
+          <button onclick="editBtn(${id}, '${title}', '${message}')">수정</button>
+          <button onclick="deleteBtn(${id})">삭제</button>
         </div>
       `;
         cardList.appendChild(card);
@@ -44,3 +45,41 @@ function loadList() {
 }
 
 loadList();
+
+function deleteBtn(id) {
+  fetch('/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      loadList();
+    });
+}
+
+function editBtn(id, title, message) {
+  let card = document.getElementById(`card-${id}`);
+  card.innerHTML = `
+    <div>
+      <input id="modify-title-${id}" value="${title}" />
+      <input id="modify-message-${id}" value="${message}" />
+      <button onclick="modifyBtn(${id})">저장</button>
+      <button onclick="loadList()">취소</button>
+    </div>
+  `;
+}
+
+function modifyBtn(id) {
+  let newTitle = document.getElementById(`modify-title-${id}`).value;
+  let newMessage = document.getElementById(`modify-message-${id}`).value;
+  fetch('/modify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id, title: newTitle, message: newMessage }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      loadList();
+    });
+}
