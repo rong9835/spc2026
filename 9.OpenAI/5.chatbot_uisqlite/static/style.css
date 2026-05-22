@@ -1,0 +1,126 @@
+/* 기본 배경 및 폰트 설정 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* 챗봇 전체를 감싸는 박스 */
+.chatbot-wrapper {
+    width: 100%;
+    max-width: 450px;
+    height: 80vh;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 타이틀 스타일 */
+h1 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 20px;
+    margin: 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: center;
+    color: #333;
+}
+
+/* 대화창 스크롤 영역 */
+#chat-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+#result {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* 말풍선 사이의 간격 */
+}
+
+/* 개별 메시지 공통 정렬 선언 */
+.message {
+    display: flex;
+    width: 100%;
+}
+
+/* 말풍선 공통 스타일 */
+.bubble {
+    max-width: 70%;
+    padding: 10px 16px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-break: break-all;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* 1. 사용자 메시지 (우측 정렬, 초록/파란색 계열) */
+.message.user {
+    justify-content: flex-end;
+}
+.message.user .bubble {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 4px; /* 카톡 느낌의 뾰족한 모서리 효과 */
+}
+
+/* 2. 챗봇 메시지 (좌측 정렬, 밝은 회색 계열) */
+.message.bot {
+    justify-content: flex-start;
+}
+.message.bot .bubble {
+    background-color: #e9ecef;
+    color: #333;
+    border-bottom-left-radius: 4px;
+}
+
+/* 하단 입력 폼 영역 */
+#user-input-form {
+    display: flex;
+    padding: 15px;
+    background-color: #ffffff;
+    border-top: 1px solid #f0f0f0;
+    gap: 10px;
+}
+
+/* 입력창 스타일 */
+#user-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 25px;
+    outline: none;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+#user-input:focus {
+    border-color: #007bff;
+}
+
+/* 전송 버튼 스타일 */
+#user-input-form button {
+    padding: 0 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#user-input-form button:hover {
+    background-color: #0056b3;
+}
