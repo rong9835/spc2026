@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}{{ song.title }} - MusicBox{% endblock %}
+
+{% block content %}
+<a href="/" class="text-sm text-slate-400 hover:text-indigo-400">&larr; 목록으로</a>
+
+<!-- ===== 유튜브 영상 재생기 ===== -->
+<div class="mt-4 rounded-xl overflow-hidden border border-slate-700">
+    <iframe class="w-full aspect-video"
+            src="https://www.youtube.com/embed/{{ song.youtube_id }}"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+            allowfullscreen></iframe>
+</div>
+
+<h1 class="text-xl font-bold mt-4">{{ song.title }}</h1>
+{% if song.description %}
+<p class="text-slate-400 text-sm mt-2 whitespace-pre-line">{{ song.description }}</p>
+{% endif %}
+
+<!-- ===== 좋아요 버튼 ===== -->
+<div class="mt-4">
+    {% if session.user_id %}
+    <button id="like-btn" data-liked="{{ 'true' if is_liked else 'false' }}"
+            class="px-4 py-2 rounded-lg border border-slate-700 hover:border-rose-500 transition">
+        <span id="like-icon">{{ '❤️' if is_liked else '🤍' }}</span>
+        좋아요 <span id="like-count">{{ like_count }}</span>
+    </button>
+    {% else %}
+    <p class="text-sm text-slate-400">🤍 좋아요 {{ like_count }}
+        <a href="/auth" class="text-indigo-400">(로그인 후 누를 수 있어요)</a></p>
+    {% endif %}
+</div>
+
+<!-- ===== 해시태그 ===== -->
+<section class="mt-6">
+    <h2 class="font-semibold mb-2">해시태그</h2>
+    <div id="hashtag-list" class="flex flex-wrap gap-2">
+        {% for h in hashtags %}
+        <span class="text-xs bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-indigo-300"
+              title="{{ h.username }}님이 추가">#{{ h.tag }}</span>
+        {% endfor %}
+    </div>
+
+    {% if session.user_id %}
+    <div class="flex gap-2 mt-3">
+        <input type="text" id="hashtag-input" placeholder="해시태그 추가 (예: 발라드)"
+               class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm
+                      focus:outline-none focus:border-indigo-500">
+        <button id="hashtag-btn"
+                class="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-lg text-sm">추가</button>
+    </div>
+    {% endif %}
+</section>
+
+<!-- ===== 댓글 ===== -->
+<section class="mt-8">
+    <h2 class="font-semibold mb-3">댓글</h2>
+
+    {% if session.user_id %}
+    <div class="flex gap-2 mb-4">
+        <input type="text" id="comment-input" placeholder="댓글을 입력하세요"
+               class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2
+                      focus:outline-none focus:border-indigo-500">
+        <button id="comment-btn"
+                class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg font-medium">등록</button>
+    </div>
+    {% else %}
+    <p class="text-sm text-slate-400 mb-4">
+        <a href="/auth" class="text-indigo-400">로그인</a> 후 댓글을 남길 수 있어요.</p>
+    {% endif %}
+
+    <div id="comment-list" class="space-y-3">
+        {% for c in comments %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <div class="flex items-center gap-2 text-sm">
+                <span class="font-medium">{{ c.username }}</span>
+                {% if c.role == 'admin' %}
+                <span class="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 rounded">관리자</span>
+                {% endif %}
+                <span class="text-xs text-slate-500">{{ c.created_at }}</span>
+            </div>
+            <p class="text-sm mt-1">{{ c.content }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% if not comments %}
+    <p id="no-comment" class="text-sm text-slate-400">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 이 노래의 유튜브 ID (API 주소를 만들 때 사용)
+    const YOUTUBE_ID = "{{ song.youtube_id }}";
+
+    // ---- 좋아요 ----
+    const likeBtn = document.getElementById('like-btn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', async () => {
+            const data = await postJSON(`/api/songs/${YOUTUBE_ID}/like`, {});
+            if (data.success) {
+                document.getElementById('like-icon').textContent = data.liked ? '❤️' : '🤍';
+                document.getElementById('like-count').textContent = data.like_count;
+            }
+        });
+    }
+
+    // ---- 해시태그 추가 ----
+    const hashtagBtn = document.getElementById('hashtag-btn');
+    if (hashtagBtn) {
+        const input = document.getElementById('hashtag-input');
+        const add = async () => {
+            const tag = input.value.trim();
+            if (!tag) return;
+            const data = await postJSON(`/api/songs/${YOUTUBE_ID}/hashtags`, { tag });
+            if (data.success) {
+                const span = document.createElement('span');
+                span.className = 'text-xs bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-indigo-300';
+                span.textContent = '#' + data.tag;
+                document.getElementById('hashtag-list').appendChild(span);
+                input.value = '';
+            } else {
+                showToast(data.message, 'error');
+            }
+        };
+        hashtagBtn.addEventListener('click', add);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') add(); });
+    }
+
+    // ---- 댓글 등록 ----
+    const commentBtn = document.getElementById('comment-btn');
+    if (commentBtn) {
+        const input = document.getElementById('comment-input');
+        const add = async () => {
+            const content = input.value.trim();
+            if (!content) return;
+            const data = await postJSON(`/api/songs/${YOUTUBE_ID}/comments`, { content });
+            if (data.success) {
+                const noComment = document.getElementById('no-comment');
+                if (noComment) noComment.remove();
+
+                const box = document.createElement('div');
+                box.className = 'bg-slate-800 border border-slate-700 rounded-lg p-3';
+                box.innerHTML = `
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="font-medium">${escapeHtml(data.comment.username)}</span>
+                        <span class="text-xs text-slate-500">${data.comment.created_at}</span>
+                    </div>
+                    <p class="text-sm mt-1">${escapeHtml(data.comment.content)}</p>`;
+                document.getElementById('comment-list').appendChild(box);
+                input.value = '';
+            } else {
+                showToast(data.message, 'error');
+            }
+        };
+        commentBtn.addEventListener('click', add);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') add(); });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MusicBox{% endblock %}</title>
+
+    <!-- Tailwind CSS 를 CDN(인터넷 주소)으로 불러옵니다. 별도 설치/빌드가 필요 없습니다. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- ===== 상단 내비게이션 바 ===== -->
+    <nav class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold text-indigo-400">🎵 MusicBox</a>
+
+            <div class="flex items-center gap-4">
+                {% if session.user_id %}
+                    <!-- 알림 종 아이콘 -->
+                    <div class="relative">
+                        <button id="bell-button" class="relative text-2xl hover:scale-110 transition">
+                            🔔
+                            <!-- 안 읽은 알림 개수 배지 (없으면 숨김) -->
+                            <span id="bell-badge"
+                                  class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                                         rounded-full w-5 h-5 flex items-center justify-center"></span>
+                        </button>
+                        <!-- 알림 목록 (종을 누르면 펼쳐짐) -->
+                        <div id="bell-dropdown"
+                             class="hidden absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700
+                                    rounded-lg shadow-xl p-2 max-h-96 overflow-y-auto">
+                            <p class="text-sm text-slate-400 px-2 py-1">알림</p>
+                            <div id="bell-list" class="space-y-1"></div>
+                        </div>
+                    </div>
+
+                    <a href="/profile" class="text-sm hover:text-indigo-400">내 프로필</a>
+                    {% if session.role == 'admin' %}
+                        <a href="/admin" class="text-sm text-amber-400 hover:text-amber-300">관리자</a>
+                    {% endif %}
+                    <span class="text-sm text-slate-400">{{ session.username }}님</span>
+                    <a href="/api/logout"
+                       class="text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded">로그아웃</a>
+                {% else %}
+                    <a href="/auth"
+                       class="text-sm bg-indigo-600 hover:bg-indigo-500 px-4 py-1.5 rounded font-medium">
+                        로그인 / 회원가입
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== 화면 알림 메시지(토스트)가 잠깐 떴다 사라지는 자리 ===== -->
+    <div id="toast"
+         class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg shadow-lg
+                text-sm font-medium"></div>
+
+    <!-- ===== 각 페이지의 실제 내용이 들어가는 자리 ===== -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 로그인 여부를 자바스크립트에게 알려줍니다. (알림 폴링을 켤지 결정) -->
+    <script>
+        window.IS_LOGGED_IN = {{ 'true' if session.user_id else 'false' }};
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

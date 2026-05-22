@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}MusicBox - 음악 검색 SNS{% endblock %}
+
+{% block content %}
+<!-- ===== 검색창 ===== -->
+<section class="mb-8">
+    <h1 class="text-2xl font-bold mb-1">함께 듣고 이야기 나누는 음악 공간</h1>
+    <p class="text-slate-400 mb-4 text-sm">제목 · 설명 · 해시태그로 등록된 노래를 찾아보세요.</p>
+
+    <form action="/" method="get" class="flex gap-2">
+        <input type="text" name="q" value="{{ query }}"
+               placeholder="예) 아이유, 신나는, #kpop"
+               class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2
+                      focus:outline-none focus:border-indigo-500">
+        <button type="submit"
+                class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg font-medium">검색</button>
+    </form>
+
+    <!-- 인기 해시태그: 누르면 그 태그로 검색됩니다. -->
+    {% if tags %}
+    <div class="flex flex-wrap gap-2 mt-4">
+        {% for tag in tags %}
+        <a href="/?q={{ tag.tag }}"
+           class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700
+                  px-3 py-1 rounded-full text-indigo-300">
+            #{{ tag.tag }} <span class="text-slate-500">{{ tag.count }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+<!-- ===== 유튜브에서 새 노래 검색해 등록하기 (로그인한 사람만) ===== -->
+{% if session.user_id %}
+<section class="mb-8 bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+    <h2 class="font-semibold mb-3">🔎 유튜브에서 노래 찾아 등록하기</h2>
+    <div class="flex gap-2">
+        <input type="text" id="yt-query"
+               placeholder="유튜브에서 검색할 노래 제목을 입력하세요"
+               class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2
+                      focus:outline-none focus:border-indigo-500">
+        <button id="yt-search-btn"
+                class="bg-rose-600 hover:bg-rose-500 px-5 py-2 rounded-lg font-medium">유튜브 검색</button>
+    </div>
+    <!-- 유튜브 검색 결과가 여기에 카드로 나타납니다. -->
+    <div id="yt-results" class="grid sm:grid-cols-2 gap-3 mt-4"></div>
+</section>
+{% endif %}
+
+<!-- ===== 등록된 노래 목록 ===== -->
+<section>
+    <h2 class="font-semibold mb-3">
+        {% if query %}'{{ query }}' 검색 결과 ({{ songs|length }}곡){% else %}등록된 노래{% endif %}
+    </h2>
+
+    {% if songs %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for song in songs %}
+        <a href="/song/{{ song.youtube_id }}"
+           class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden
+                  hover:border-indigo-500 transition group">
+            <img src="{{ song.thumbnail_url }}" alt="{{ song.title }}"
+                 class="w-full aspect-video object-cover">
+            <div class="p-3">
+                <h3 class="font-medium text-sm line-clamp-2 group-hover:text-indigo-400">
+                    {{ song.title }}</h3>
+                <div class="flex flex-wrap gap-1 mt-2">
+                    {% for tag in song.tags[:3] %}
+                    <span class="text-[11px] bg-slate-700 px-2 py-0.5 rounded-full text-indigo-300">
+                        #{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <div class="flex gap-3 mt-2 text-xs text-slate-400">
+                    <span>{{ '❤️' if song.is_liked else '🤍' }} {{ song.like_count }}</span>
+                    <span>💬 {{ song.comment_count }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-slate-400 text-sm py-8 text-center">
+        {% if query %}검색 결과가 없습니다. 위에서 유튜브로 검색해 등록해 보세요!
+        {% else %}아직 등록된 노래가 없습니다.{% endif %}
+    </p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 유튜브 검색 버튼을 눌렀을 때 실행됩니다.
+    const ytBtn = document.getElementById('yt-search-btn');
+    if (ytBtn) {
+        ytBtn.addEventListener('click', searchYoutube);
+        document.getElementById('yt-query').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') searchYoutube();
+        });
+    }
+
+    async function searchYoutube() {
+        const query = document.getElementById('yt-query').value.trim();
+        const resultsBox = document.getElementById('yt-results');
+        if (!query) return;
+
+        resultsBox.innerHTML = '<p class="text-slate-400 text-sm">검색 중...</p>';
+        const res = await fetch('/api/youtube/search?q=' + encodeURIComponent(query));
+        const videos = await res.json();
+
+        if (!videos.length) {
+            resultsBox.innerHTML = '<p class="text-slate-400 text-sm">검색 결과가 없습니다.</p>';
+            return;
+        }
+
+        // 검색된 영상들을 카드로 그립니다.
+        resultsBox.innerHTML = '';
+        videos.forEach((v) => {
+            const card = document.createElement('div');
+            card.className = 'bg-slate-900 border border-slate-700 rounded-lg p-2 flex gap-3';
+            card.innerHTML = `
+                <img src="${v.thumbnail_url}" class="w-28 aspect-video object-cover rounded">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs line-clamp-2">${escapeHtml(v.title)}</p>
+                    <button class="mt-2 text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded">
+                        등록하기</button>
+                </div>`;
+            // '등록하기' 버튼에 기능 연결
+            card.querySelector('button').addEventListener('click', () => registerSong(v));
+            resultsBox.appendChild(card);
+        });
+    }
+
+    // 선택한 유튜브 영상을 우리 사이트에 노래로 등록합니다.
+    async function registerSong(video) {
+        const data = await postJSON('/api/songs', video);
+        if (data.success) {
+            showToast(data.message, 'success');
+            // 등록 후 해당 노래 상세 페이지로 이동
+            location.href = '/song/' + data.youtube_id;
+        } else {
+            showToast(data.message, 'error');
+        }
+    }
+</script>
+{% endblock %}

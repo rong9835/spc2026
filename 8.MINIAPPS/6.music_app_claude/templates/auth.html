@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}로그인 / 회원가입 - MusicBox{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto mt-8">
+    <!-- 로그인 / 회원가입 탭 -->
+    <div class="flex mb-6 bg-slate-800 rounded-lg p-1">
+        <button id="tab-login"
+                class="flex-1 py-2 rounded-md text-sm font-medium bg-indigo-600">로그인</button>
+        <button id="tab-register"
+                class="flex-1 py-2 rounded-md text-sm font-medium text-slate-400">회원가입</button>
+    </div>
+
+    <!-- 입력 폼 (로그인/회원가입이 같은 칸을 함께 사용) -->
+    <div class="space-y-3">
+        <input type="text" id="username" placeholder="아이디 (3글자 이상)"
+               class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5
+                      focus:outline-none focus:border-indigo-500">
+        <input type="password" id="password" placeholder="비밀번호 (4글자 이상)"
+               class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5
+                      focus:outline-none focus:border-indigo-500">
+        <button id="submit-btn"
+                class="w-full bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-lg font-medium">
+            로그인</button>
+    </div>
+
+    <!-- 예시 계정 안내 (학습용) -->
+    <div class="mt-6 text-xs text-slate-500 bg-slate-800/50 rounded-lg p-3">
+        <p class="font-medium text-slate-400 mb-1">예시 계정</p>
+        <p>관리자: admin / admin123</p>
+        <p>일반: user1 / user123</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 현재 모드: 'login'(로그인) 또는 'register'(회원가입)
+    let mode = 'login';
+
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // 탭을 누르면 모드를 바꾸고 버튼 글자/색을 갱신합니다.
+    tabLogin.addEventListener('click', () => setMode('login'));
+    tabRegister.addEventListener('click', () => setMode('register'));
+
+    function setMode(next) {
+        mode = next;
+        const active = 'flex-1 py-2 rounded-md text-sm font-medium bg-indigo-600';
+        const inactive = 'flex-1 py-2 rounded-md text-sm font-medium text-slate-400';
+        tabLogin.className = mode === 'login' ? active : inactive;
+        tabRegister.className = mode === 'register' ? active : inactive;
+        submitBtn.textContent = mode === 'login' ? '로그인' : '회원가입';
+    }
+
+    // 제출 버튼: 모드에 따라 로그인 또는 회원가입 API 를 호출합니다.
+    submitBtn.addEventListener('click', submit);
+    document.getElementById('password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submit();
+    });
+
+    async function submit() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const url = mode === 'login' ? '/api/login' : '/api/register';
+
+        const data = await postJSON(url, { username, password });
+        if (data.success) {
+            showToast(data.message, 'success');
+            if (mode === 'login') {
+                // 로그인 성공 → 메인으로 이동
+                setTimeout(() => location.href = '/', 600);
+            } else {
+                // 회원가입 성공 → 로그인 탭으로 전환
+                setMode('login');
+            }
+        } else {
+            showToast(data.message, 'error');
+        }
+    }
+</script>
+{% endblock %}

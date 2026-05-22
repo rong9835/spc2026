@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}관리자 - MusicBox{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">관리자 센터</h1>
+
+<!-- 탭 버튼 -->
+<div class="flex gap-2 mb-6 border-b border-slate-700">
+    <button class="tab-btn pb-2 px-2 border-b-2 border-indigo-500 text-indigo-400"
+            data-tab="users">회원 관리 ({{ users|length }})</button>
+    <button class="tab-btn pb-2 px-2 border-b-2 border-transparent text-slate-400"
+            data-tab="songs">노래 관리 ({{ songs|length }})</button>
+    <button class="tab-btn pb-2 px-2 border-b-2 border-transparent text-slate-400"
+            data-tab="comments">댓글 관리 ({{ comments|length }})</button>
+</div>
+
+<!-- ===== 회원 관리 ===== -->
+<section id="tab-users" class="tab-panel">
+    <div class="space-y-2">
+        {% for u in users %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3 flex items-center justify-between">
+            <div class="text-sm">
+                <span class="font-medium">{{ u.username }}</span>
+                <span class="text-xs px-2 py-0.5 rounded ml-2
+                      {{ 'bg-amber-500/20 text-amber-400' if u.role == 'admin' else 'bg-slate-700 text-slate-400' }}">
+                    {{ u.role }}</span>
+                <span class="text-xs text-slate-500 ml-2">#{{ u.id }}</span>
+            </div>
+            {% if u.id != session.user_id %}
+            <div class="flex gap-2">
+                <button onclick="toggleRole({{ u.id }})"
+                        class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded">등급 변경</button>
+                <button onclick="deleteUser({{ u.id }})"
+                        class="text-xs bg-rose-600/80 hover:bg-rose-600 px-3 py-1 rounded">탈퇴</button>
+            </div>
+            {% else %}
+            <span class="text-xs text-slate-500">나</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===== 노래 관리 ===== -->
+<section id="tab-songs" class="tab-panel hidden">
+    <div class="space-y-2">
+        {% for s in songs %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <img src="{{ s.thumbnail_url }}" class="w-20 aspect-video object-cover rounded">
+                <div class="text-sm min-w-0">
+                    <a href="/song/{{ s.youtube_id }}" class="font-medium line-clamp-1 hover:text-indigo-400">
+                        {{ s.title }}</a>
+                    <p class="text-xs text-slate-500">❤️ {{ s.like_count }} · 💬 {{ s.comment_count }}</p>
+                </div>
+            </div>
+            <button onclick="deleteSong('{{ s.youtube_id }}')"
+                    class="text-xs bg-rose-600/80 hover:bg-rose-600 px-3 py-1 rounded shrink-0">삭제</button>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===== 댓글 관리 ===== -->
+<section id="tab-comments" class="tab-panel hidden">
+    <div class="space-y-2">
+        {% for c in comments %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3 flex items-center justify-between gap-3">
+            <div class="text-sm min-w-0">
+                <p class="line-clamp-1">{{ c.content }}</p>
+                <p class="text-xs text-slate-500">{{ c.username }} · {{ c.song_title }} · {{ c.created_at }}</p>
+            </div>
+            <button onclick="deleteComment({{ c.id }})"
+                    class="text-xs bg-rose-600/80 hover:bg-rose-600 px-3 py-1 rounded shrink-0">삭제</button>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ---- 탭 전환 ----
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            // 모든 탭 패널 숨기고, 버튼 색 초기화
+            document.querySelectorAll('.tab-panel').forEach((p) => p.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach((b) => {
+                b.classList.remove('border-indigo-500', 'text-indigo-400');
+                b.classList.add('border-transparent', 'text-slate-400');
+            });
+            // 선택한 탭만 보이게
+            document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+            btn.classList.add('border-indigo-500', 'text-indigo-400');
+            btn.classList.remove('border-transparent', 'text-slate-400');
+        });
+    });
+
+    // ---- 회원 등급 변경 ----
+    async function toggleRole(userId) {
+        const data = await postJSON(`/api/admin/users/${userId}/role`, {});
+        if (data.success) location.reload();
+        else showToast(data.message, 'error');
+    }
+
+    // ---- 회원 탈퇴 ----
+    async function deleteUser(userId) {
+        if (!confirm('정말 이 회원을 탈퇴시킬까요?')) return;
+        const data = await deleteJSON(`/api/admin/users/${userId}`);
+        if (data.success) location.reload();
+        else showToast(data.message, 'error');
+    }
+
+    // ---- 노래 삭제 ----
+    async function deleteSong(youtubeId) {
+        if (!confirm('이 노래와 관련 댓글/좋아요를 모두 삭제할까요?')) return;
+        const data = await deleteJSON(`/api/admin/songs/${youtubeId}`);
+        if (data.success) location.reload();
+        else showToast(data.message, 'error');
+    }
+
+    // ---- 댓글 삭제 ----
+    async function deleteComment(commentId) {
+        if (!confirm('이 댓글을 삭제할까요?')) return;
+        const data = await deleteJSON(`/api/admin/comments/${commentId}`);
+        if (data.success) location.reload();
+        else showToast(data.message, 'error');
+    }
+</script>
+{% endblock %}
