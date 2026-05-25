@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 챗봇</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar" id="sidebar" style="display:none">
+            <div class="sidebar-header">
+                <span>대화 목록</span>
+                <button id="new-chat-btn">+ 새 대화</button>
+            </div>
+            <div id="session-list"></div>
+        </div>
+
+        <div class="main">
+            <h1>💬 나만의 챗봇</h1>
+
+            <div id="user-setup">
+                <input type="text" id="user-id-input" placeholder="이름을 입력하세요..." required>
+                <button id="start-btn">시작</button>
+            </div>
+
+            <div id="chat-container" style="display:none">
+                <div id="result"></div>
+            </div>
+
+            <form id="user-input-form" style="display:none">
+                <input type="text" id="user-input" placeholder="메시지를 입력하세요..." required>
+                <button type="submit">전송</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
