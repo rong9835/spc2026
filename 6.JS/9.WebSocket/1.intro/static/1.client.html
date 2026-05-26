@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>웹소켓 테스트</h1>
+    <input type="text" id="msg" placeholder="메시지 입력">
+    <button id="send">전송</button>
+    <script>
+        const socket = new WebSocket("ws://localhost:8000");
+        socket.onopen = () => {
+            console.log("서버와 연결됨.")
+        }
+
+        socket.onmessage = (event) => {
+            console.log("서버 메시지: ", event.data);
+        }
+
+        document.getElementById('send').addEventListener('click', () => {
+            const msg = document.getElementById("msg").value;
+            socket.send(msg);
+        })
+    </script>
+</body>
+</html>
