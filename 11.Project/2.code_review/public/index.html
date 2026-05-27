@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>코드 취약점 분석기</title>
+  </head>
+  <body>
+    <h1>코드 취약점 분석기</h1>
+    <form id="myForm">
+      <input type="text" id="url" placeholder="GitHub URL 입력" />
+      <input type="checkbox" value="민감정보" /> 민감정보
+      <input type="checkbox" value="SQL Injection" />
+      SQL Injection
+      <input type="checkbox" value="XSS" /> XSS
+      <button type="submit">Check</button>
+    </form>
+    <h2>소스 코드</h2>
+    <pre id="sourceCode"></pre>
+
+    <h2>분석 결과</h2>
+    <pre id="result"></pre>
+
+    <script>
+      document
+        .getElementById('myForm')
+        .addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const url = document.getElementById('url').value;
+          const vulnerabilities = [
+            ...document.querySelectorAll('input[type=checkbox]:checked'),
+          ].map((cb) => cb.value);
+          const result = document.getElementById('result');
+          const sourceCode = document.getElementById('sourceCode');
+
+          // 1. fetch 로 POST로 소스코드 내용을 다 보낸다. application/json 으로 보낸다.
+          const response = await fetch('/api/codecheck', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // body: JSON.stringify({ code: code })  // 원래 문법은 key, value 각각 써야 하나.. JS가 아래처럼 축약 표현을 지원함
+            body: JSON.stringify({ url, vulnerabilities }),
+          });
+          const data = await response.json();
+          console.log(data);
+
+          // 2. 결과를 받아와서 result에 출력한다.
+          result.innerText = data.result;
+          sourceCode.innerText = data.source_code;
+        });
+    </script>
+  </body>
+</html>
