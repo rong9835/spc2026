@@ -7,7 +7,23 @@
 # 5. [추가] 메모리를 통해서 대화 내용 컨텍스트를 기억하게 한다.
 
 
-from flask import Flask, render_template
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    send_from_directory,
+    render_template,
+    Response,
+)
+import json
+import openai
+import os
+from dotenv import load_dotenv
+import sqlite3
+
+load_dotenv()
+
+client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 app = Flask(__name__)
 
@@ -26,6 +42,44 @@ curriculums = {
 @app.route('/')
 def home():
     return render_template('home.html', grades=curriculums.keys())
+
+
+@app.route('/chat/stream', methods=['POST'])
+def chat_stream():
+    data = request.get_json()
+    grade = data['grade']
+    curriculum_title = data['curriculumTitle']
+    user_input = data['input']
+
+    def generate_response():
+        response = client.chat.completions.create(
+            model='gpt-4o-mini',
+            messages=[
+                {
+                    'role': 'system',
+                    'content': f'너는 초등학교 {grade}학년 학생에게 {curriculum_title}주제로 영어를 가르치는 선생님이야. 학생이 영어로 대화하게끔 유도해',
+                },
+                {'role': 'user', 'content': user_input},
+            ],  # 변수 이름
+            stream=True,
+        )
+        for chunk in response:
+            content = chunk.choices[0].delta.content
+            if content:
+                yield f'data: {json.dumps({"content": content}, ensure_ascii=False)}\n\n'
+        yield 'data: [DONE]\n\n'
+
+    return Response(generate_response(), mimetype='text/event-stream')
+
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_input = data['input']
+    response = client.chat.completions.create(
+        model='gpt-4o-mini', messages=[{'role': 'user', 'content': user_input}]
+    )
+    return jsonify({'reply': response.choices[0].message.content})
 
 
 @app.route('/grade/<int:grade>')

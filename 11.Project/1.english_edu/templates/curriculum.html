@@ -1,4 +1,44 @@
 {% extends 'base.html' %} {% block content %}
 <h2>{{grade}} 학년 - {{curriculum_title}}</h2>
-<!-- 이후에 채팅창 박스를 넣고 대화하도록 만들어야함 -->
+
+<div id="chat"></div>
+<input type="text" id="input" placeholder="입력하시오" />
+<button id="submit">전송</button>
+<script>
+  const grade = {{ grade }};
+  const curriculumTitle = "{{ curriculum_title }}";
+  document.getElementById('submit').addEventListener('click', async () => {
+    const input = document.getElementById('input').value;
+    const response = await fetch('/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input ,grade,curriculumTitle}),
+    });
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6); // ← 이 줄 빠짐
+          if (data === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.content) {
+              fullText += parsed.content;
+              document.getElementById('chat').innerHTML = fullText;
+            }
+          } catch (e) {}
+        }
+      }
+    }
+  });
+</script>
 {% endblock %}
