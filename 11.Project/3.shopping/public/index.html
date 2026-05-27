@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPC 쇼핑몰</title>
+  </head>
+  <body>
+    <h1>상품 리뷰</h1>
+
+    <div class="product-image">
+      <img src="https://picsum.photos/600/400" />
+    </div>
+
+    <!-- 리뷰 작성 폼 -->
+    <section class="review-form">
+      <h2>후기를 작성해주세요</h2>
+      <div>
+        <p>평점:</p>
+        <label><input type="radio" name="rating" value="1" />1</label>
+        <label><input type="radio" name="rating" value="2" />2</label>
+        <label><input type="radio" name="rating" value="3" />3</label>
+        <label><input type="radio" name="rating" value="4" />4</label>
+        <label><input type="radio" name="rating" value="5" />5</label>
+      </div>
+
+      <textarea
+        id="comment"
+        placeholder="후기를 작성해주세요..."
+        rows="5"
+        cols="40"
+      ></textarea>
+      <button id="send">제출</button>
+
+      <!-- 리뷰 영역 -->
+      <section>
+        <h2>리뷰</h2>
+        <div id="review-container">
+          <div class="ai-summary">
+            <p><strong>AI 요약:</strong>현재는 리뷰가 없습니다.</p>
+            <p><strong>평균 별점:</strong>N/A</p>
+          </div>
+        </div>
+      </section>
+    </section>
+    <script>
+      async function loadReviews() {
+        const reviewsResponse = await fetch('/api/reviews');
+        const reviewData = await reviewsResponse.json();
+        const reviews = reviewData.data;
+
+        // 평균 별점 계산
+        let avg = 'N/A';
+        if (reviews.length > 0) {
+          let total = 0;
+          for (let i = 0; i < reviews.length; i++) {
+            total = total + Number(reviews[i].rating);
+          }
+          avg = (total / reviews.length).toFixed(1);
+        }
+
+        // AI 요약 불러오기
+        let aiSummary = '리뷰가 없습니다.';
+        if (reviews.length > 0) {
+          const aiResponse = await fetch('/api/ai-summary');
+          const aiData = await aiResponse.json();
+          aiSummary = aiData.message;
+        }
+
+        // 리뷰 목록 HTML 만들기
+        let reviewHtml = '';
+        for (let i = 0; i < reviews.length; i++) {
+          reviewHtml += `<p>${reviews[i].rating}점 - ${reviews[i].comment}</p>`;
+        }
+
+        // 화면에 표시
+        document.getElementById('review-container').innerHTML = `
+          <p><strong>AI 요약:</strong> ${aiSummary}</p>
+          <p><strong>평균 별점:</strong> ${avg}</p>
+          ${reviewHtml}
+        `;
+      }
+
+      loadReviews();
+
+      document.getElementById('send').addEventListener('click', async () => {
+        await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: document.querySelector('input[name="rating"]:checked')
+              .value,
+            comment: document.getElementById('comment').value,
+          }),
+        });
+        loadReviews();
+      });
+    </script>
+  </body>
+</html>
