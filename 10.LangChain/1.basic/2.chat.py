@@ -9,10 +9,13 @@ from langchain_openai import ChatOpenAI  # Q&A 용으로 사용 (Chat Model = gp
 llm = OpenAI(model='gpt-3.5-turbo-instruct')
 prompt = '다음 문장을 한국말로 번역해줘: Good Morning'
 print(llm.invoke(prompt))
+print('-'*50)
 
 llm2 = ChatOpenAI(model='gpt-4o-mini')
 prompt2 = '게임 회사를 창업하려고 하는데, 이름 후보군을 3개 지어주세요'
-print(llm.invoke(prompt2))
+result = llm2.invoke(prompt2)
+print(result.content)
+print('-'*50)
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 prompt3 = [
@@ -20,4 +23,5 @@ prompt3 = [
     HumanMessage(content="게임 회사를 창업하려고 하는데, 이름 후보군을 3개 지어주세요")
 ]
 
-print(llm.invoke(prompt3))
+result = llm2.invoke(prompt3)
+print(result.content)

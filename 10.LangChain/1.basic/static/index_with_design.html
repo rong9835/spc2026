@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPC 작명소</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            outline: none;
+            background: #f8fafc;
+        }
+
+        button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 14px;
+            background: #3b82f6;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 140px;
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.7;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #cbd5e1;
+            min-height: 20px;
+        }
+
+        .progress-wrapper {
+            width: 100%;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #3b82f6);
+            transition: width 0.3s;
+        }
+
+        .result-box {
+            margin-top: 35px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 18px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 18px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        li:hover {
+            transform: translateX(6px);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .loading-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #38bdf8;
+            animation: bounce 1s infinite alternate;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            to {
+                transform: translateY(-6px);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SPC 작명소</h1>
+
+        <p class="subtitle">상품명을 입력하면 AI가 어울리는 회사 이름 후보를 생성해드립니다.</p>
+
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="예: AI 영어 교육 플랫폼" />
+
+            <button id="send">이름 생성</button>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="progress-wrapper" id="progressWrapper">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="result-box">
+            <h2 class="result-title">생성 결과</h2>
+            <ul id="resultList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const sendButton = document.getElementById('send');
+        const userInput = document.getElementById('userInput');
+        const resultList = document.getElementById('resultList');
+        const progressBar = document.getElementById('progressBar');
+        const progressWrapper = document.getElementById('progressWrapper');
+        const statusDiv = document.getElementById('status');
+
+        let progressInterval;
+
+        function startLoadingUI() {
+            sendButton.disabled = true;
+            userInput.disabled = true;
+
+            progressWrapper.style.display = 'block';
+
+            statusDiv.innerHTML = `
+            <div class="loading-text">
+                AI가 회사 이름을 생성중입니다
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        `;
+
+            let width = 0;
+
+            progressBar.style.width = '0%';
+
+            progressInterval = setInterval(() => {
+                width += Math.random() * 12;
+
+                if (width > 90) {
+                    width = 90;
+                }
+
+                progressBar.style.width = width + '%';
+            }, 300);
+        }
+
+        function stopLoadingUI() {
+            clearInterval(progressInterval);
+
+            progressBar.style.width = '100%';
+
+            setTimeout(() => {
+                progressWrapper.style.display = 'none';
+                progressBar.style.width = '0%';
+            }, 400);
+
+            sendButton.disabled = false;
+            userInput.disabled = false;
+
+            statusDiv.textContent = '회사 이름 생성이 완료되었습니다.';
+        }
+
+        sendButton.addEventListener('click', async () => {
+            const value = userInput.value.trim();
+
+            if (!value) {
+                alert('상품명을 입력해주세요.');
+                return;
+            }
+
+            resultList.innerHTML = '';
+
+            startLoadingUI();
+
+            try {
+                const response = await fetch('/api/name', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product: value,
+                    }),
+                });
+
+                const data = await response.json();
+
+                console.log(data);
+
+                stopLoadingUI();
+
+                data.chatbot.forEach((name, index) => {
+                    const li = document.createElement('li');
+
+                    li.innerHTML = `${name}`;
+
+                    resultList.appendChild(li);
+                });
+            } catch (error) {
+                console.error(error);
+
+                clearInterval(progressInterval);
+
+                progressWrapper.style.display = 'none';
+
+                sendButton.disabled = false;
+                userInput.disabled = false;
+
+                statusDiv.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+            }
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
