@@ -14,5 +14,10 @@ uploads/
 sessions/
 .sessions/
 
+chroma_db/
 *.db
 *.sqlite
+# Data
+
+history.json
+*.pdf
