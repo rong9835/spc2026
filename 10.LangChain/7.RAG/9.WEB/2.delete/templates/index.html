@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>RAG 챗봇</h1>
+    <div>
+        <div>
+            <h2>PDF 업로드</h2>
+            <form id="upload-form">
+                <input type="file" id="file-input" accept=".pdf">
+                <button type="submit">업로드</button>
+            </form>
+            <div>
+                <h3>업로드된 파일 목록</h3>
+                <ul id="file-list"><!-- li 들이 올곳 --></ul>
+            </div>
+        </div>
+        <div>
+            <h2>질문하기</h2>
+            <form id="ask-form">
+                <input type="text" id="question-input" placeholder="질문을 입력하세요">
+                <button type="submit">질문</button>
+            </form>
+            <div id="answer"></div>
+        </div>
+    </div>
+    <script>
+        // '/files를 불러서 목록을 가져온다' -> li로 채운다.
+        function renderFiles(files) {
+            const ul = document.getElementById('file-list');
+            ul.innerHTML = '';
+            for (const f of files) {
+                const li = document.createElement('li');
+                li.textContent = `${f.source} (청크: ${f.chunks}개)`
+
+                const btn = document.createElement('button');
+                btn.textContent = '삭제';
+                btn.dataset.source = f.source;  // 나중에 삭제 시 버튼을 구분하고, 내 파일명을 저장해놨다가 보내주기 위해서...
+                li.appendChild(btn);
+                ul.appendChild(li);
+            }
+        }
+
+        // 버튼에 이벤트 붙이고 백엔드로 DELETE 메소드로 호출하는것
+        document.getElementById('file-list').addEventListener('click', async (ev) => {
+            const source = ev.target.dataset.source;
+            if (!source) return;
+
+            if (!confirm(`'${source}' 를 삭제할까요?`)) return;
+
+            const r = await fetch('/files/' + encodeURIComponent(source), {method: 'DELETE'});
+            const d = await r.json();
+            console.log('삭제후 응답: ', d)
+            
+            if (d.files) {
+                renderFiles(d.files);
+            }
+        })
+
+        async function loadFiles() {
+            const r = await fetch('/files');
+            const d = await r.json();
+            console.log("파일명: ", d)
+            renderFiles(d.files)
+        }
+        loadFiles()
+
+        // 1. "업로드" 버튼을 통해서 문서 전송한다 (fetch('/upload') -> 결과 받아서 성공/실패 여부 출력)
+        const form = document.getElementById("upload-form");
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+
+            const fileInput = document.getElementById('file-input').files[0];
+            if (!fileInput) return; // 빈 파일 전송 금지
+
+            const formData = new FormData();
+            formData.append("file", fileInput);
+
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            const data = result.message
+            console.log(data);
+        })
+
+        // 2. "질문" 버튼을 통해서 질문 한다 (fetch('/ask') -> 결과 받아서 아래 div 에 답변 출력)
+        document.getElementById('ask-form').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const q = document.getElementById('question-input').value.trim();
+            const r = await fetch('/ask', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ question: q })
+            });
+            const d = await r.json();
+            console.log(d.answer)
+
+            const answerDiv = document.getElementById('answer');
+            answerDiv.textContent = d.answer;
+        })
+    </script>
+</body>
+</html>

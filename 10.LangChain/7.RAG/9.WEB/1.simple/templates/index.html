@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>RAG 챗봇</h1>
+    <div>
+        <div>
+            <h2>PDF 업로드</h2>
+            <form id="upload-form">
+                <input type="file" id="file-input" accept=".pdf">
+                <button type="submit">업로드</button>
+            </form>
+        </div>
+        <div>
+            <h2>질문하기</h2>
+            <form id="ask-form">
+                <input type="text" id="question-input" placeholder="질문을 입력하세요">
+                <button type="submit">질문</button>
+            </form>
+            <div id="answer"></div>
+        </div>
+    </div>
+    <script>
+        // 1. "업로드" 버튼을 통해서 문서 전송한다 (fetch('/upload') -> 결과 받아서 성공/실패 여부 출력)
+        const form = document.getElementById("upload-form");
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+
+            const fileInput = document.getElementById('file-input').files[0];
+            if (!fileInput) return; // 빈 파일 전송 금지
+
+            const formData = new FormData();
+            formData.append("file", fileInput);
+
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            const data = result.message
+            console.log(data);
+        })
+
+        // 2. "질문" 버튼을 통해서 질문 한다 (fetch('/ask') -> 결과 받아서 아래 div 에 답변 출력)
+        document.getElementById('ask-form').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const q = document.getElementById('question-input').value.trim();
+            const r = await fetch('/ask', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ question: q })
+            });
+            const d = await r.json();
+            console.log(d.answer)
+
+            const answerDiv = document.getElementById('answer');
+            answerDiv.textContent = d.answer;
+        })
+    </script>
+</body>
+</html>
