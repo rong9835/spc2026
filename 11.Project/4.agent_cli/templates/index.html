@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>금융 도우미</title>
+  </head>
+  <body>
+    <h1>금융 도우미</h1>
+
+    <div id="chat-box">
+      <p>안녕하세요! 주가, 환율, 뉴스를 물어보세요.</p>
+    </div>
+
+    <form id="ask-form">
+      <input
+        type="text"
+        id="question-input"
+        placeholder="질문을 입력하세요..."
+      />
+      <button>전송</button>
+    </form>
+    <div id="answer"></div>
+    <script>
+      document
+        .getElementById('ask-form')
+        .addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const question = document
+            .getElementById('question-input')
+            .value.trim();
+          const response = await fetch('/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: question }),
+          });
+          const data = await response.json();
+          document.getElementById('answer').textContent = data.answer;
+        });
+    </script>
+  </body>
+</html>
