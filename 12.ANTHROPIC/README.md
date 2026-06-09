@@ -1,289 +1,329 @@
-# 12. Anthropic API 핵심 요약
+# Anthropic API & MCP 핵심 요약
 
-> 🎯 Claude AI를 파이썬에서 직접 사용하는 방법을 배웁니다.
+> **이 폴더에서 배우는 것:**  
+> Claude AI를 내 파이썬 코드에서 쓰는 법 → LangChain으로 쉽게 쓰는 법 → MCP로 Claude에게 새 기능 추가하는 법
 
 ---
 
-## 📁 폴더 구조
+## 전체 구조 한눈에 보기
 
 ```
 12.ANTHROPIC/
-├── 1.basic/          ← Anthropic SDK 직접 사용
-│   ├── 1.intro.py    ← 기본 메시지 보내기
-│   ├── 2.chat.py     ← 대화 기록 유지하기
-│   ├── 3.models.py   ← 모델별 성능 비교
-│   └── 4.thinking.py ← AI 사고 과정 보기
-└── 2.langchain/      ← LangChain으로 Claude 사용
-    ├── 1.intro.py    ← LangChain 기본 연결
-    └── 2.template.py ← 프롬프트 템플릿
+├── 1.basic/          ← Claude API 직접 호출 (기초)
+├── 2.langchain/      ← LangChain 라이브러리 활용
+├── 3.mcp/            ← MCP 서버/클라이언트 만들기
+└── 4.claude_desktop/ ← Claude Desktop에 내 도구 연결하기
 ```
 
 ---
 
-## 🧩 핵심 개념 한눈에 보기
+## 1. Basic — Claude API 기초 (`1.basic/`)
 
-| 개념 | 쉬운 비유 | 역할 |
-|------|-----------|------|
-| **Anthropic SDK** | 전화기 | Claude AI에 직접 전화 걸기 |
-| **LangChain** | 전화 앱 | 전화를 더 편리하게 해주는 앱 |
-| **messages** | 대화 기록장 | 이전 대화를 기억하는 메모 |
-| **temperature** | 창의성 조절 버튼 | 높을수록 더 창의적인 답변 |
-| **streaming** | 실시간 자막 | 답변을 한 글자씩 바로 출력 |
-| **thinking** | AI 속마음 | AI가 어떻게 생각하는지 보여줌 |
+### 핵심 개념
+
+```
+내 코드 → Anthropic API → Claude → 답변 반환
+```
+
+> 비유: Claude에게 편지를 보내고 답장을 받는 것.  
+> `client.messages.create()` = 편지 보내기
+
+### 파일별 요약
+
+| 파일 | 배우는 것 | 핵심 포인트 |
+|------|-----------|-------------|
+| `1.intro.py` | 첫 API 호출 | `client.messages.create()` 기본 사용법 |
+| `2.chat.py` | 대화 이어가기 | `messages` 배열에 대화 기록 누적 |
+| `3.models.py` | 모델별 비교 | Haiku(빠름) vs Sonnet vs Opus(고성능) |
+| `4.thinking.py` | Extended Thinking | AI가 "생각하는 과정"을 보여주는 기능 |
 
 ---
 
-## 📌 1. 기본 메시지 보내기 (`1.basic/1.intro.py`)
-
-### 핵심 코드
+### STEP 1 — 첫 API 호출 (`1.intro.py`)
 
 ```python
 import anthropic
+from dotenv import load_dotenv
 
-client = anthropic.Anthropic()  # Claude에 연결
+load_dotenv()                          # .env 파일에서 API 키 읽기
+client = anthropic.Anthropic()         # 클라이언트 생성
 
 message = client.messages.create(
-    model="claude-haiku-4-5",   # 어떤 모델 사용할지
-    max_tokens=300,              # 최대 몇 글자 답할지
+    model="claude-haiku-4-5",          # 사용할 모델
+    max_tokens=300,                    # 최대 답변 길이
     messages=[{
         "role": "user",
         "content": "안녕! 한 문장으로 너를 소개해줘."
     }]
 )
 
-print(message.content[0].text)  # 답변 출력
+print(message.content[0].text)        # 답변 출력
 ```
 
-### 💡 OpenAI와 비교
+**필수 파라미터 설명:**
 
-| | OpenAI | Anthropic |
-|---|--------|-----------|
-| 라이브러리 | `openai` | `anthropic` |
-| 클라이언트 | `openai.OpenAI()` | `anthropic.Anthropic()` |
-| 메시지 생성 | `client.chat.completions` | `client.messages.create` |
+| 파라미터 | 설명 | 예시 |
+|----------|------|------|
+| `model` | 어떤 Claude를 쓸지 | `"claude-haiku-4-5"` |
+| `max_tokens` | 답변 최대 글자 수 제한 | `300` |
+| `messages` | 대화 내용 (role + content) | `[{"role":"user","content":"..."}]` |
 
 ---
 
-## 📌 2. 대화 기록 유지하기 (`1.basic/2.chat.py`)
+### STEP 2 — 대화 이어가기 (`2.chat.py`)
 
-### 핵심 아이디어
-
-> **AI는 기본적으로 기억이 없다!**
-> 이전 대화를 직접 `messages` 배열에 쌓아서 보내야 한다.
+**비유:** 카카오톡 채팅처럼 이전 대화를 기억하게 만들기
 
 ```python
-messages = []  # 대화 기록을 담는 바구니
+messages = []                          # 대화 기록 저장소 (빈 배열)
 
 def ask(question):
-    # 1. 내 질문을 바구니에 넣기
-    messages.append({'role': 'user', 'content': question})
-    
-    # 2. 바구니 전체를 AI에게 보내기
-    message = client.messages.create(
+    messages.append({'role': 'user', 'content': question})  # 질문 추가
+
+    response = client.messages.create(
         model="claude-haiku-4-5",
         max_tokens=300,
-        temperature=1.0,   # 창의성 (0~1, 높을수록 다양한 답변)
-        messages=messages  # 이전 대화 모두 포함!
+        messages=messages              # 전체 대화 기록 전달
     )
-    
-    answer = message.content[0].text
-    
-    # 3. AI 답변도 바구니에 넣기
-    messages.append({'role': 'assistant', 'content': answer})
+
+    answer = response.content[0].text
+    messages.append({'role': 'assistant', 'content': answer})  # 답변 추가
     return answer
 
 ask("내 이름은 홍길동이야")
-ask("그래서, 내가 누구라고??")  # 이전 대화를 기억함!
+ask("그래서, 내가 누구라고??")          # 이전 대화를 기억함!
 ```
 
-### 🗂️ messages 배열 구조
-
-```
-[
-  {"role": "user",      "content": "내 이름은 홍길동이야"},
-  {"role": "assistant", "content": "안녕하세요, 홍길동님!"},
-  {"role": "user",      "content": "그래서, 내가 누구라고??"},
-  ...
-]
-```
+> **핵심:** `messages` 배열에 대화를 쌓아가면 Claude가 이전 내용을 기억합니다.
 
 ---
 
-## 📌 3. 모델 비교하기 (`1.basic/3.models.py`)
+### STEP 3 — 모델 비교 (`3.models.py`)
 
-### Claude 모델 종류
-
-| 모델 | 특징 | 비유 |
-|------|------|------|
-| **Haiku** | 빠르고 저렴 | 자전거 (가볍고 빠름) |
-| **Sonnet** | 균형잡힌 성능 | 자동차 (일반 용도) |
-| **Opus** | 강력한 고성능 | 스포츠카 (복잡한 작업) |
-
-### 핵심 코드
+```
+claude-haiku-4-5   → 가장 빠름, 간단한 작업에 적합
+claude-sonnet-4-6  → 균형잡힌 성능, 일반 개발에 추천
+claude-opus-4-7/8  → 가장 뛰어난 추론, 복잡한 문제에 사용
+```
 
 ```python
-import time
-
 models = ['claude-haiku-4-5', 'claude-sonnet-4-6', 'claude-opus-4-8']
 
 for model in models:
-    start = time.time()  # 시간 측정 시작
-    
-    msg = client.messages.create(
-        model=model,
-        max_tokens=500,
-        messages=[{"role": "user", "content": "..."}]
-    )
-    
-    elapsed = time.time() - start  # 걸린 시간
-    
+    start = time.time()
+    msg = client.messages.create(model=model, ...)
+    elapsed = time.time() - start
     print(f"[{model}] {elapsed:.1f}초, {msg.usage.output_tokens} 토큰")
 ```
 
-> **토큰(Token)** = AI가 읽고 쓰는 단위. 영어는 단어, 한국어는 글자 단위로 생각하면 됨.
-
 ---
 
-## 📌 4. AI 사고 과정 보기 (`1.basic/4.thinking.py`)
+### STEP 4 — Extended Thinking (`4.thinking.py`)
 
-### 스트리밍 + Thinking 이란?
-
-```
-일반 방식: 답변이 다 만들어진 후 한번에 출력
-스트리밍:  한 글자씩 실시간으로 출력 (ChatGPT 처럼)
-Thinking:  AI가 답변 전에 "생각하는 과정"도 보여줌
-```
-
-### 핵심 코드
+**비유:** Claude가 답을 내기 전에 "어떻게 풀지 생각하는 과정"을 보여줌
 
 ```python
 with client.messages.stream(
     model='claude-opus-4-8',
     max_tokens=2000,
-    thinking={"type": "adaptive", "display": "summarized"},  # 사고 과정 활성화
-    messages=[{"role": "user", "content": "12 x 13을 단계별로 설명해줘"}]
+    thinking={"type": "adaptive", "display": "summarized"},  # 생각 활성화
+    messages=[{"role": "user", "content": "12 x 13 단계별로 설명해줘"}]
 ) as stream:
     for event in stream:
-        if event.type == "content_block_delta":
-            if event.delta.type == "thinking_delta":
-                print(event.delta.thinking, end="")  # 생각 출력
-            elif event.delta.type == "text_delta":
-                print(event.delta.text, end="")      # 답변 출력
+        if event.delta.type == "thinking_delta":
+            print("[생각]", event.delta.thinking)    # 추론 과정
+        elif event.delta.type == "text_delta":
+            print("[답변]", event.delta.text)        # 최종 답변
 ```
 
 ---
 
-## 📌 5. LangChain으로 연결하기 (`2.langchain/1.intro.py`)
+## 2. LangChain — 더 쉽게 Claude 쓰기 (`2.langchain/`)
 
 ### LangChain이란?
 
-> 다양한 AI 모델을 **똑같은 방식**으로 쓸 수 있게 해주는 도구
+> **비유:** Claude를 직접 쓰는 것 vs LangChain으로 쓰는 것  
+> = 생 재료로 요리하는 것 vs 밀키트로 요리하는 것  
+> LangChain이 복잡한 부분을 미리 처리해 줍니다.
+
+| 파일 | 배우는 것 |
+|------|-----------|
+| `1.intro.py` | LangChain으로 Claude 1줄 호출 |
+| `2.template.py` | 프롬프트 템플릿으로 재사용 가능한 질문 만들기 |
+
+---
+
+### 기본 호출 (`1.intro.py`)
 
 ```python
-# OpenAI 사용할 때
-from langchain_openai import ChatOpenAI
-llm = ChatOpenAI(model='gpt-4o')
-
-# Anthropic 사용할 때 (방법이 같음!)
 from langchain_anthropic import ChatAnthropic
+
 llm = ChatAnthropic(model='claude-sonnet-4-6')
 
-# 이후 코드는 동일하게 사용
 response = llm.invoke('인공지능에 대해서 설명해주세요')
 print(response.content)
 ```
 
+> `client.messages.create()` 보다 훨씬 간단하죠?
+
 ---
 
-## 📌 6. 프롬프트 템플릿 (`2.langchain/2.template.py`)
+### 프롬프트 템플릿 (`2.template.py`)
 
-### 왜 템플릿을 쓸까?
-
-> **재사용** 가능한 질문 틀을 만들어서, 변수만 바꿔 여러 번 사용
-
-### 두 가지 템플릿 종류
-
-#### ① PromptTemplate (단순 텍스트)
-
-```python
-from langchain_core.prompts import PromptTemplate
-
-template = PromptTemplate.from_template('다음 주제에 대해 설명하시오: {topic}')
-
-# 변수만 바꿔서 재사용
-result1 = llm.invoke(template.format(topic='LLM기술'))
-result2 = llm.invoke(template.format(topic='transformer 기술'))
-```
-
-#### ② ChatPromptTemplate (역할 지정 대화형)
+**비유:** 빈칸 채우기 문제처럼 질문 틀을 만들어두고 변수만 바꾸는 방법
 
 ```python
 from langchain_core.prompts import ChatPromptTemplate
 
+# 템플릿 만들기 (변수 = {role}, {concept})
 chat_template = ChatPromptTemplate.from_messages([
-    ('system', '당신은 {role} 전문가입니다.'),   # AI 역할 설정
-    ('human', '{concept}에 대해 설명해주세요.'),  # 사용자 질문
+    ('system', '당신은 {role} 전문가입니다.'),
+    ('human', '다음 개념을 설명해주세요: {concept}'),
 ])
 
-# 파이프(|)로 연결 → chain 만들기
+# 체인 연결 (파이프 | 로 연결)
 chain = chat_template | llm
 
-result = chain.invoke({
-    'role': '인공지능',
-    'concept': '트랜스포머'
-})
+# 변수만 채워서 실행
+result = chain.invoke({'role': '인공지능', 'concept': '트랜스포머'})
+print(result.content)
 ```
 
-### 🔗 Chain이란?
+**체인(`|`) 개념:**
 
 ```
-프롬프트 → AI → 결과
-  (템플릿) | (LLM) = chain
-```
-
-> 레고 블록처럼 여러 단계를 `|` 기호로 연결하는 방식
-
----
-
-## 🔑 전체 흐름 요약
-
-```
-1. API 키 설정 (.env 파일)
-        ↓
-2. 클라이언트 생성 (Anthropic() 또는 ChatAnthropic())
-        ↓
-3. 메시지 전송 (messages 배열로 대화 기록 관리)
-        ↓
-4. 응답 출력 (message.content[0].text)
+프롬프트 템플릿 → | → LLM → 결과
+(빈칸 채우기)          (Claude)
 ```
 
 ---
 
-## ⚙️ 환경 설정
+## 3. MCP — Claude에게 새 기능 추가하기 (`3.mcp/`)
 
-```bash
-# 필수 패키지 설치
-pip install anthropic
-pip install langchain-anthropic
-pip install python-dotenv
+> **자세한 내용은 `3.mcp/README.md` 참고**
 
-# .env 파일에 API 키 저장
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
+### MCP란?
+
+```
+Claude ←→ MCP 서버 ←→ 외부 기능 (계산기, 검색, 파일 등)
+```
+
+> 비유: Claude라는 폰에 **앱(기능)을 설치**하는 방법
+
+### 핵심 패턴
+
+```python
+# 서버: 도구 만들기
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("내서버")
+
+@mcp.tool()                        # 이 함수를 Claude가 쓸 수 있는 도구로 등록
+def add(a: int, b: int) -> int:
+    """ 두 수를 더합니다 """        # 설명이 있어야 Claude가 언제 쓸지 알 수 있음
+    return a + b
+
+mcp.run()
 ```
 
 ```python
-# 코드에서 불러오기
-from dotenv import load_dotenv
-load_dotenv()  # .env 파일 자동으로 읽어옴
+# 클라이언트: 도구 호출하기
+await session.initialize()                         # 연결
+tools = await session.list_tools()                 # 도구 목록 확인
+result = await session.call_tool("add", {"a": 3, "b": 5})  # 도구 실행
+```
+
+### 통신 방식 2가지
+
+| 방식 | 언제 쓰나 | 실행 방법 |
+|------|-----------|-----------|
+| `stdio` | 로컬 테스트 | `mcp.run()` |
+| `HTTP` | 네트워크, 여러 클라이언트 | `mcp.run(transport="streamable-http")` |
+
+---
+
+## 4. Claude Desktop 연결 (`4.claude_desktop/`)
+
+> **자세한 내용은 `4.claude_desktop/README.md` 참고**
+
+### 내 MCP 서버를 Claude Desktop 앱에 연결하기
+
+**설정 파일 경로:**
+- Mac: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "내서버이름": {
+      "command": "python",
+      "args": ["/절대경로/내서버.py"]
+    }
+  }
+}
+```
+
+재시작 후 채팅창에 🔌 아이콘이 보이면 연결 성공!
+
+---
+
+## 시작하기 (설치 & 실행)
+
+```bash
+# 필수 패키지 설치
+pip install anthropic python-dotenv
+
+# LangChain 사용 시
+pip install langchain-anthropic
+
+# MCP 사용 시
+pip install mcp
+
+# .env 파일 만들기 (.env)
+ANTHROPIC_API_KEY=sk-ant-xxxxxx
+
+# 실행
+python 1.basic/1.intro.py
 ```
 
 ---
 
-## 📝 자주 헷갈리는 것
+## 전체 학습 흐름
 
-| 헷갈리는 것 | 정답 |
-|------------|------|
-| `message.content` 왜 `[0]`? | AI 답변이 리스트로 오기 때문 (보통 첫 번째 요소 사용) |
-| `temperature`는 뭐? | 0에 가까울수록 일관된 답변, 1에 가까울수록 다양한 답변 |
-| `max_tokens`는 왜 설정? | 너무 긴 답변 방지 (비용 절감) |
-| `streaming`이 왜 필요? | 긴 답변도 기다리지 않고 바로바로 보여주기 위해 |
+```
+1. basic/1.intro.py    → Claude API 첫 호출 성공
+        ↓
+2. basic/2.chat.py     → 대화 이어가기 (멀티턴)
+        ↓
+3. basic/3.models.py   → 모델별 속도/성능 비교
+        ↓
+4. basic/4.thinking.py → AI 추론 과정 보기 (Extended Thinking)
+        ↓
+5. langchain/1.intro.py     → LangChain으로 더 간단하게
+        ↓
+6. langchain/2.template.py  → 프롬프트 재사용 (템플릿)
+        ↓
+7. 3.mcp/              → MCP 서버 만들고 도구 추가하기
+        ↓
+8. 4.claude_desktop/   → Claude Desktop 앱에 내 도구 연결
+```
+
+---
+
+## 핵심 용어 사전
+
+| 용어 | 한 줄 설명 |
+|------|------------|
+| `model` | 어떤 Claude를 쓸지 (haiku=빠름, opus=똑똑함) |
+| `max_tokens` | 답변 최대 길이 제한 |
+| `messages` | 대화 기록 배열 (role: user/assistant) |
+| `temperature` | 답변의 창의성 (0=일정, 1=다양) |
+| `stream` | 답변을 한 번에 vs 글자씩 실시간 출력 |
+| `Extended Thinking` | AI가 답 내기 전 추론 과정을 보여주는 기능 |
+| `LangChain` | AI 앱 개발을 쉽게 만드는 파이썬 라이브러리 |
+| `PromptTemplate` | 변수가 있는 재사용 가능한 질문 틀 |
+| `Chain (\|)` | 여러 컴포넌트를 연결하는 LangChain 파이프 |
+| `MCP` | Claude에게 새 기능(도구)을 추가하는 규격 |
+| `@mcp.tool()` | 파이썬 함수를 Claude 도구로 등록하는 장식자 |
+| `FastMCP` | MCP 서버를 쉽게 만드는 라이브러리 |
+| `stdio` | 로컬 프로세스 간 통신 방식 |
