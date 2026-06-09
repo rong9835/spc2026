@@ -1,22 +1,24 @@
 <html>
-  <head>
-    <title>타이틀</title>
-  </head>
-  <body>
-    <h2>로그인 창</h2>
-    <form>
-      <label for="username">아이디</label>
-      <input type="text" id="username" /><br />
-      <label for="password">비밀번호</label>
-      <input type="password" id="password" />
+    <head>
+        <title>타이틀</title>
+    </head>
+    <body>
+        <h2>로그인 창</h2>
+        <form method="GET" action="login.html">
+            <label for="username">아이디</label>
+            <input type="text" id="username" name="id"><br>
 
-      <input type="submit" value="로그인" />
-    </form>
-    <h2>검색 창</h2>
-    <form method="GET" action="search">
-      <label for="query">검색어</label>
-      <input type="text" />
-      <input type="submit" value="검색" />
-    </form>
-  </body>
+            <label for="psasword">비밀번호</label>
+            <input type="password" id="password" name="pw">
+
+            <input type="submit" value="로그인">
+        </form>
+
+        <h2>검색 창</h2>
+        <form method="GET" action="search">
+            <label for="query">검색어</label>
+            <input type="text" name="q" id="query">
+            <input type="submit" value="검색">
+        </form>
+    </body>
 </html>
